@@ -1,0 +1,145 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #050510;
+  --accent-cyan: #67e8f9;
+  --accent-violet: #8b5cf6;
+  --accent-fuchsia: #e879f9;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: #eef0ff;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.45);
+  color: #fff;
+}
+
+/* Slim custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #050510;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #164e63, #4c1d95);
+  border-radius: 8px;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-fuchsia));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text {
+  background: linear-gradient(
+    100deg,
+    var(--accent-cyan) 0%,
+    var(--accent-violet) 45%,
+    var(--accent-fuchsia) 80%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-pan 6s ease-in-out infinite alternate;
+}
+
+@keyframes gradient-pan {
+  from { background-position: 0% center; }
+  to   { background-position: 100% center; }
+}
+
+/* Glassmorphism panel */
+.glass {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Animated gradient border card (Projects placeholder) */
+.gradient-border {
+  position: relative;
+  background: rgba(8, 8, 22, 0.75);
+  border-radius: 1.25rem;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    rgba(103, 232, 249, 0.6),
+    rgba(139, 92, 246, 0.6),
+    rgba(232, 121, 249, 0.6),
+    rgba(103, 232, 249, 0.6)
+  );
+  background-size: 300% 300%;
+  animation: border-pan 8s linear infinite;
+}
+
+@keyframes border-pan {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Hero letter cascade */
+@keyframes letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em) rotateX(50deg);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+    filter: blur(0);
+  }
+}
+.letter {
+  display: inline-block;
+  opacity: 0;
+  animation: letter-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.float-slow {
+  animation: float-y 5s ease-in-out infinite;
+}
+
+/* Glow pulse for primary CTA */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(139, 92, 246, 0.45), 0 0 60px rgba(103, 232, 249, 0.15); }
+  50%      { box-shadow: 0 0 40px rgba(139, 92, 246, 0.7), 0 0 90px rgba(103, 232, 249, 0.3); }
+}
+.glow-cta {
+  animation: glow-pulse 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter { animation-duration: 0.01s; }
+  .gradient-text, .gradient-border::before, .float-slow, .glow-cta {
+    animation: none;
+  }
+}

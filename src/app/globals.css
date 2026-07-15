@@ -64,12 +64,21 @@ body {
   to   { background-position: 100% center; }
 }
 
-/* Glassmorphism panel */
+/* Glassmorphism panel. The tint is a dark wash rather than a white one so the
+   additive particle field behind it can't wash out foreground text. */
 .glass {
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(11, 11, 26, 0.66);
   border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+}
+
+/* Near-opaque surface for content that must stay legible over the canvas. */
+.panel {
+  background: rgba(9, 9, 22, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
 }
 
 /* Animated gradient border card (Projects placeholder) */

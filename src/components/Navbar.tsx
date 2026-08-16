@@ -7,7 +7,6 @@ const links = ['About', 'Experience', 'Projects', 'Skills', 'Contact'];
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [active, setActive] = useState('about');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -15,89 +14,71 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => {
-    const sections = links
-      .map((l) => document.getElementById(l.toLowerCase()))
-      .filter(Boolean) as HTMLElement[];
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) setActive(e.target.id);
-        }
-      },
-      { rootMargin: '-40% 0px -55% 0px' }
-    );
-    sections.forEach((s) => io.observe(s));
-    return () => io.disconnect();
-  }, []);
-
   return (
     <>
-      <nav className="fixed top-5 left-0 right-0 z-50 flex justify-center px-4">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-5 md:px-8">
         <div
-          className={`flex items-center gap-1 px-2 py-2 rounded-full border transition-all duration-300 ${
-            scrolled
-              ? 'bg-[#050510]/90 border-white/10 backdrop-blur-xl shadow-lg shadow-violet-950/40'
-              : 'bg-[#050510]/50 border-white/[0.06] backdrop-blur-md'
+          className={`flex items-center justify-between transition-all duration-300 ${
+            scrolled ? 'py-3' : 'py-5'
           }`}
         >
-          {/* Logo */}
-          <a
-            href="#about"
-            className="relative w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold mr-1 text-white bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-fuchsia-500/20 border border-white/15"
-          >
-            PP
+          {/* Brand */}
+          <a href="#about" className="flex items-center gap-2.5 group">
+            <span className="w-8 h-8 rounded-lg bg-[color:var(--ink)] text-[color:var(--bg)] flex items-center justify-center text-xs font-bold tracking-tight">
+              PP
+            </span>
+            <span
+              className="text-sm font-semibold tracking-tight text-[color:var(--ink)] hidden sm:block"
+              style={{ fontFamily: 'var(--font-grotesk)' }}
+            >
+              Prasadh Pathiraja
+            </span>
           </a>
 
-          {/* Desktop links */}
-          <ul className="hidden md:flex items-center">
-            {links.map((l) => {
-              const isActive = active === l.toLowerCase();
-              return (
-                <li key={l}>
-                  <a
-                    href={`#${l.toLowerCase()}`}
-                    className={`text-sm transition-colors duration-200 px-4 py-1.5 rounded-full ${
-                      isActive
-                        ? 'text-white bg-white/10'
-                        : 'text-white/50 hover:text-white/90 hover:bg-white/5'
-                    }`}
-                  >
-                    {l}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+          <div
+            className={`hidden md:flex items-center gap-1 rounded-full px-2 py-1.5 transition-all duration-300 ${
+              scrolled ? 'station' : 'bg-transparent'
+            }`}
+          >
+            {links.map((l) => (
+              <a
+                key={l}
+                href={`#${l.toLowerCase()}`}
+                className="text-sm text-[color:var(--ink-soft)] hover:text-[color:var(--ink)] transition-colors px-3.5 py-1.5 rounded-full hover:bg-white/50"
+              >
+                {l}
+              </a>
+            ))}
+          </div>
 
           {/* CTA */}
           <a
             href="#contact"
-            className="hidden md:flex ml-1 px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 hover:brightness-110 text-white text-sm font-medium transition-all duration-200"
+            className="hidden md:inline-flex px-5 py-2 rounded-full bg-[color:var(--ink)] text-[color:var(--bg)] text-sm font-semibold hover:bg-[color:var(--coral)] transition-colors duration-200"
           >
-            Hire Me
+            Let’s talk
           </a>
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden px-3 py-1.5 text-white/60 hover:text-white transition-colors"
+            className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-1 text-[color:var(--ink)]"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
-            <span className={`block w-5 h-0.5 bg-current transition-transform duration-200 ${menuOpen ? 'rotate-45 translate-y-[5px]' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-current mt-1 transition-opacity duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-            <span className={`block w-5 h-0.5 bg-current mt-1 transition-transform duration-200 ${menuOpen ? '-rotate-45 -translate-y-[9px]' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-current transition-transform duration-200 ${menuOpen ? 'rotate-45 translate-y-[6px]' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-current transition-opacity duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-current transition-transform duration-200 ${menuOpen ? '-rotate-45 -translate-y-[6px]' : ''}`} />
           </button>
         </div>
       </nav>
 
       {menuOpen && (
-        <div className="fixed top-20 left-4 right-4 z-40 bg-[#050510]/95 border-white/10 backdrop-blur-xl border rounded-2xl shadow-xl shadow-black/50 px-4 py-3 flex flex-col gap-1 md:hidden">
+        <div className="fixed top-16 left-4 right-4 z-40 station rounded-2xl px-4 py-3 flex flex-col gap-1 md:hidden">
           {links.map((l) => (
             <a
               key={l}
               href={`#${l.toLowerCase()}`}
-              className="text-white/70 hover:text-white hover:bg-white/5 transition-all px-3 py-2.5 rounded-xl text-sm"
+              className="text-[color:var(--ink-soft)] hover:text-[color:var(--ink)] hover:bg-white/50 transition-all px-3 py-2.5 rounded-xl text-sm"
               onClick={() => setMenuOpen(false)}
             >
               {l}
@@ -105,10 +86,10 @@ export default function Navbar() {
           ))}
           <a
             href="#contact"
-            className="mt-1 px-3 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 text-white text-sm font-medium transition-colors text-center"
+            className="mt-1 px-3 py-2.5 rounded-xl bg-[color:var(--ink)] text-[color:var(--bg)] text-sm font-semibold text-center"
             onClick={() => setMenuOpen(false)}
           >
-            Hire Me
+            Let’s talk
           </a>
         </div>
       )}

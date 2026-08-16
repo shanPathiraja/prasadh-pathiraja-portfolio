@@ -2,12 +2,11 @@
 
 import Reveal from './Reveal';
 
-/* Aurora palette interpolated per letter — background-clip:text breaks on
-   animated children, so we bake the gradient into per-letter colors. */
+/* Warm dawn palette interpolated per letter for the surname. */
 const STOPS: [number, number, number][] = [
-  [103, 232, 249], // cyan
-  [139, 92, 246],  // violet
-  [232, 121, 249], // fuchsia
+  [255, 107, 92],  // coral
+  [245, 166, 35],  // amber
+  [99, 102, 241],  // indigo
 ];
 
 function letterColor(t: number) {
@@ -37,12 +36,7 @@ function Cascade({
           className="letter"
           style={{
             animationDelay: `${from + i * 55}ms`,
-            ...(gradient
-              ? {
-                  color: letterColor(i / last),
-                  textShadow: '0 0 32px rgba(139, 92, 246, 0.45)',
-                }
-              : {}),
+            ...(gradient ? { color: letterColor(i / last) } : {}),
           }}
         >
           {ch}
@@ -56,18 +50,18 @@ export default function Hero() {
   return (
     <section
       id="about"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center md:justify-end overflow-hidden px-6 md:px-12"
     >
-      <div className="relative z-10 text-center max-w-3xl mx-auto px-6 pt-24">
+      <div className="relative z-10 w-full max-w-xl md:mr-[5vw] text-left station rounded-3xl p-8 md:p-10 border-l-4 border-l-[color:var(--coral)]">
         <Reveal delay={0} threshold={0}>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass text-white/70 text-xs font-medium mb-10 tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 text-[color:var(--ink-soft)] text-xs font-semibold mb-6 tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Available for new projects
           </div>
         </Reveal>
 
         <h1
-          className="text-5xl md:text-[76px] font-bold leading-[1.06] tracking-tight mb-6 text-white"
+          className="text-5xl md:text-[72px] font-bold leading-[0.95] tracking-tight mb-6 text-[color:var(--ink)]"
           style={{ fontFamily: 'var(--font-grotesk)', perspective: '600px' }}
         >
           <Cascade text="Prasadh" from={150} />
@@ -76,31 +70,31 @@ export default function Hero() {
         </h1>
 
         <Reveal delay={900} threshold={0}>
-          <p className="text-base md:text-lg font-medium tracking-[0.25em] uppercase mb-5 text-cyan-300/90">
+          <p className="text-sm md:text-base font-semibold tracking-[0.3em] uppercase mb-6 text-[color:var(--coral)]">
             Full Stack Engineer
           </p>
         </Reveal>
 
         <Reveal delay={1050} threshold={0}>
-          <p className="text-white/50 text-base md:text-lg max-w-xl mx-auto mb-12 leading-relaxed">
+          <p className="text-[color:var(--ink-soft)] text-base md:text-lg max-w-lg mb-10 leading-relaxed">
             4+ years building production applications end-to-end — frontend, backend, and
             everything between. Biased toward code the team can actually maintain.
           </p>
         </Reveal>
 
         <Reveal delay={1200} threshold={0}>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4">
             <a
               href="#experience"
-              className="glow-cta px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 hover:brightness-110 hover:scale-[1.03] active:scale-[0.98] text-white text-sm font-semibold transition-all duration-200"
+              className="glow-cta px-8 py-3.5 rounded-full bg-[color:var(--coral)] hover:brightness-105 hover:scale-[1.03] active:scale-[0.98] text-white text-sm font-semibold transition-all duration-200"
             >
-              View My Work
+              Explore my work
             </a>
             <a
               href="#contact"
-              className="px-8 py-3.5 rounded-full glass text-white/70 hover:text-white hover:border-white/25 text-sm font-semibold transition-all duration-200"
+              className="px-8 py-3.5 rounded-full station text-[color:var(--ink)] hover:border-[color:var(--coral)] text-sm font-semibold transition-all duration-200"
             >
-              Get In Touch
+              Get in touch
             </a>
           </div>
         </Reveal>
@@ -111,9 +105,9 @@ export default function Hero() {
         threshold={0}
         className="absolute bottom-10 left-1/2 -translate-x-1/2"
       >
-        <div className="flex flex-col items-center gap-2 text-white/30 text-xs float-slow">
-          <span className="tracking-[0.35em] text-[10px]">SCROLL</span>
-          <div className="w-px h-10 bg-gradient-to-b from-cyan-400/50 to-transparent" />
+        <div className="flex flex-col items-center gap-2 text-[color:var(--ink-soft)] text-xs float-slow">
+          <span className="tracking-[0.35em] text-[10px]">SCROLL TO TRAVEL</span>
+          <div className="w-px h-10 bg-gradient-to-b from-[color:var(--coral)] to-transparent" />
         </div>
       </Reveal>
     </section>

@@ -42,21 +42,26 @@ export default function Contact() {
   ];
 
   const inputClass =
-    'glass text-white placeholder-white/30 focus:border-cyan-400/50 focus:bg-cyan-400/[0.04] rounded-xl px-4 py-3 outline-none transition-all';
+    'panel text-[color:var(--ink)] placeholder-[color:var(--ink-soft)]/60 focus:border-[color:var(--coral)]/60 focus:bg-orange-50/40 rounded-xl px-4 py-3 outline-none transition-all';
 
   return (
-    <section id="contact" className="relative py-28 px-6 max-w-5xl mx-auto">
-      <Reveal className="mb-16">
-        <p className="section-label mb-3">Contact</p>
-        <h2
-          className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4"
-          style={{ fontFamily: 'var(--font-grotesk)' }}
-        >
-          Let&apos;s Work Together
-        </h2>
-        <p className="text-white/45 max-w-md">
-          Have a project in mind or just want to say hi? My inbox is always open.
-        </p>
+    <section id="contact" className="relative py-32 px-6 max-w-5xl mx-auto">
+      <Reveal className="mb-16 relative">
+        <span className="numeral absolute -top-16 -left-2 text-[120px] md:text-[180px] select-none pointer-events-none opacity-70">
+          05
+        </span>
+        <div className="relative">
+          <p className="section-label mb-3">Contact</p>
+          <h2
+            className="text-4xl md:text-5xl font-bold text-[color:var(--ink)] tracking-tight mb-4"
+            style={{ fontFamily: 'var(--font-grotesk)' }}
+          >
+            Let&apos;s Work Together
+          </h2>
+          <p className="text-[color:var(--ink-soft)] max-w-md">
+            Have a project in mind or just want to say hi? My inbox is always open.
+          </p>
+        </div>
       </Reveal>
 
       <div className="grid lg:grid-cols-2 gap-12">
@@ -70,12 +75,12 @@ export default function Contact() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-5 group"
                 >
-                  <div className="w-11 h-11 rounded-xl glass group-hover:border-cyan-400/40 group-hover:bg-cyan-400/[0.06] group-hover:shadow-[0_0_20px_rgba(103,232,249,0.2)] flex items-center justify-center transition-all duration-200">
-                    <Icon size={18} className="text-white/50 group-hover:text-cyan-300 transition-colors" />
+                  <div className="w-11 h-11 rounded-xl station group-hover:border-[color:var(--coral)]/40 group-hover:bg-orange-50/60 flex items-center justify-center transition-all duration-200">
+                    <Icon size={18} className="text-[color:var(--ink-soft)] group-hover:text-[color:var(--coral)] transition-colors" />
                   </div>
                   <div>
-                    <p className="text-xs text-white/40 uppercase tracking-wider">{label}</p>
-                    <p className="text-white/80 group-hover:text-white transition-colors text-sm">{text}</p>
+                    <p className="text-xs text-[color:var(--ink-soft)] uppercase tracking-wider">{label}</p>
+                    <p className="text-[color:var(--ink)] transition-colors text-sm">{text}</p>
                   </div>
                 </a>
               </Reveal>
@@ -112,7 +117,7 @@ export default function Contact() {
             <button
               type="submit"
               disabled={status !== 'idle'}
-              className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 hover:brightness-110 text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[color:var(--ink)] hover:bg-[color:var(--coral)] text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50"
             >
               {status === 'sending' ? 'Sending...' : status === 'sent' ? 'Message sent!' : <><Send size={16} /> Send Message</>}
             </button>
@@ -120,8 +125,8 @@ export default function Contact() {
         </Reveal>
       </div>
 
-      <Reveal delay={200} className="mt-20 pt-8 border-t border-white/5">
-        <p className="text-white/30 text-center text-sm">
+      <Reveal delay={200} className="mt-20 pt-8 border-t border-black/10">
+        <p className="text-[color:var(--ink-soft)] text-center text-sm">
           © {new Date().getFullYear()} Prasadh Pathiraja. Built with Next.js, Three.js &amp; Tailwind CSS.
         </p>
       </Reveal>

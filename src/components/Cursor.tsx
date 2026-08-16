@@ -46,15 +46,15 @@ export default function Cursor() {
     <div className="hidden lg:block pointer-events-none fixed inset-0 z-[70]" aria-hidden="true">
       <div
         ref={glowRef}
-        className="absolute top-0 left-0 w-64 h-64 rounded-full opacity-25 transition-[scale] duration-300"
+        className="absolute top-0 left-0 w-64 h-64 rounded-full opacity-30 transition-[scale] duration-300"
         style={{
           background:
-            'radial-gradient(circle, rgba(103,232,249,0.35) 0%, rgba(139,92,246,0.15) 40%, transparent 70%)',
+            'radial-gradient(circle, rgba(255,107,92,0.28) 0%, rgba(245,166,35,0.12) 40%, transparent 70%)',
         }}
       />
       <div
         ref={dotRef}
-        className="absolute top-0 left-0 w-2 h-2 rounded-full bg-cyan-300 mix-blend-screen transition-transform duration-150"
+        className="absolute top-0 left-0 w-2 h-2 rounded-full bg-[color:var(--coral)] mix-blend-multiply transition-transform duration-150"
       />
     </div>
   );

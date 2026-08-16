@@ -1,62 +1,58 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #050510;
-  --accent-cyan: #67e8f9;
-  --accent-violet: #8b5cf6;
-  --accent-fuchsia: #e879f9;
+  /* Dawn theme — warm, luminous, architectural */
+  --bg: #fbeee3;
+  --ink: #2a1f1a;          /* near-black warm brown for text */
+  --ink-soft: #6b5d54;
+  --coral: #ff6b5c;
+  --amber: #f5a623;
+  --teal: #14b8a6;
+  --indigo: #6366f1;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   background: var(--bg);
-  color: #eef0ff;
+  color: var(--ink);
   overflow-x: hidden;
 }
 
 ::selection {
-  background: rgba(139, 92, 246, 0.45);
-  color: #fff;
+  background: rgba(255, 107, 92, 0.28);
+  color: var(--ink);
 }
 
 /* Slim custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 9px;
 }
 ::-webkit-scrollbar-track {
-  background: #050510;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #164e63, #4c1d95);
-  border-radius: 8px;
+  background: linear-gradient(180deg, #ffb199, #ff6b5c);
+  border-radius: 9px;
 }
 
 .section-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-fuchsia));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--coral);
 }
 
 .gradient-text {
-  background: linear-gradient(
-    100deg,
-    var(--accent-cyan) 0%,
-    var(--accent-violet) 45%,
-    var(--accent-fuchsia) 80%
-  );
+  background: linear-gradient(100deg, var(--coral) 0%, var(--amber) 55%, var(--indigo) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: gradient-pan 6s ease-in-out infinite alternate;
+  animation: gradient-pan 7s ease-in-out infinite alternate;
 }
 
 @keyframes gradient-pan {
@@ -64,50 +60,34 @@ body {
   to   { background-position: 100% center; }
 }
 
-/* Glassmorphism panel. The tint is a dark wash rather than a white one so the
-   additive particle field behind it can't wash out foreground text. */
-.glass {
-  background: rgba(11, 11, 26, 0.66);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+/* Frosted card — the "station" surface. Light + legible over the 3D sky. */
+.station {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 10px 40px -12px rgba(120, 70, 40, 0.22),
+    0 2px 8px -2px rgba(120, 70, 40, 0.12);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
 }
 
-/* Near-opaque surface for content that must stay legible over the canvas. */
+/* Near-opaque panel for dense content blocks */
 .panel {
-  background: rgba(9, 9, 22, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px) saturate(1.1);
-  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  background: rgba(255, 252, 248, 0.9);
+  border: 1px solid rgba(210, 180, 160, 0.35);
+  box-shadow: 0 8px 30px -14px rgba(120, 70, 40, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-/* Animated gradient border card (Projects placeholder) */
-.gradient-border {
-  position: relative;
-  background: rgba(8, 8, 22, 0.75);
-  border-radius: 1.25rem;
-}
-.gradient-border::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: inherit;
-  background: linear-gradient(
-    120deg,
-    rgba(103, 232, 249, 0.6),
-    rgba(139, 92, 246, 0.6),
-    rgba(232, 121, 249, 0.6),
-    rgba(103, 232, 249, 0.6)
-  );
-  background-size: 300% 300%;
-  animation: border-pan 8s linear infinite;
-}
-
-@keyframes border-pan {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Big editorial station numeral */
+.numeral {
+  font-family: var(--font-grotesk), sans-serif;
+  font-weight: 700;
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+  -webkit-text-stroke: 1.5px rgba(255, 107, 92, 0.55);
+  color: transparent;
 }
 
 /* Hero letter cascade */
@@ -137,10 +117,10 @@ body {
   animation: float-y 5s ease-in-out infinite;
 }
 
-/* Glow pulse for primary CTA */
+/* Soft glow for the primary CTA */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 24px rgba(139, 92, 246, 0.45), 0 0 60px rgba(103, 232, 249, 0.15); }
-  50%      { box-shadow: 0 0 40px rgba(139, 92, 246, 0.7), 0 0 90px rgba(103, 232, 249, 0.3); }
+  0%, 100% { box-shadow: 0 8px 24px -6px rgba(255, 107, 92, 0.55); }
+  50%      { box-shadow: 0 12px 36px -6px rgba(255, 107, 92, 0.8); }
 }
 .glow-cta {
   animation: glow-pulse 3.2s ease-in-out infinite;
@@ -148,7 +128,5 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .letter { animation-duration: 0.01s; }
-  .gradient-text, .gradient-border::before, .float-slow, .glow-cta {
-    animation: none;
-  }
+  .gradient-text, .float-slow, .glow-cta { animation: none; }
 }

@@ -189,14 +189,14 @@ function ProjectCard({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="glass rounded-xl overflow-hidden transition-all duration-300 hover:border-violet-400/30 hover:shadow-lg hover:shadow-violet-950/40">
+    <div className="panel rounded-xl overflow-hidden transition-all duration-300 hover:border-[color:var(--coral)]/40 hover:shadow-lg hover:shadow-orange-900/10">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/[0.03] transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-orange-50/40 transition-colors"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-white font-semibold text-sm">{project.name}</p>
+            <p className="text-[color:var(--ink)] font-semibold text-sm">{project.name}</p>
             {project.links?.map((l) => (
               <a
                 key={l.href}
@@ -204,25 +204,25 @@ function ProjectCard({ project }: { project: Project }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 hover:bg-cyan-500/20 transition-colors"
+                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[color:var(--coral)]/10 border border-[color:var(--coral)]/25 text-[color:var(--coral)] hover:bg-[color:var(--coral)]/20 transition-colors"
               >
                 <LinkIcon icon={l.icon} />
                 {l.label}
               </a>
             ))}
           </div>
-          <p className="text-white/40 text-xs mt-0.5">{project.subtitle}</p>
+          <p className="text-[color:var(--ink-soft)] text-xs mt-0.5">{project.subtitle}</p>
         </div>
         <div className="flex items-center gap-3 ml-4 flex-shrink-0">
           <div className="hidden sm:flex flex-wrap gap-1.5">
             {project.tags.slice(0, 3).map((t) => (
-              <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+              <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-black/5 border border-black/5 text-[color:var(--ink-soft)]">
                 {t}
               </span>
             ))}
           </div>
           <svg
-            className={`w-4 h-4 text-white/30 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 text-[color:var(--ink-soft)] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
             fill="none" viewBox="0 0 24 24" stroke="currentColor"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -231,18 +231,18 @@ function ProjectCard({ project }: { project: Project }) {
       </button>
 
       {open && (
-        <div className="px-5 pb-5 border-t border-white/5">
+        <div className="px-5 pb-5 border-t border-black/5">
           <div className="flex flex-wrap gap-1.5 mt-4 mb-4 sm:hidden">
             {project.tags.map((t) => (
-              <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-white/50">
+              <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-black/5 border border-black/5 text-[color:var(--ink-soft)]">
                 {t}
               </span>
             ))}
           </div>
           <ul className="space-y-2.5 mt-4">
             {project.bullets.map((b, i) => (
-              <li key={i} className="flex gap-3 text-sm text-white/60 leading-relaxed">
-                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-violet-400 flex-shrink-0" />
+              <li key={i} className="flex gap-3 text-sm text-[color:var(--ink-soft)] leading-relaxed">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[color:var(--coral)] flex-shrink-0" />
                 {b}
               </li>
             ))}
@@ -255,41 +255,46 @@ function ProjectCard({ project }: { project: Project }) {
 
 export default function Experience() {
   return (
-    <section id="experience" className="relative py-28 px-6 max-w-5xl mx-auto">
-      <Reveal className="mb-16">
-        <p className="section-label mb-3">Career</p>
-        <h2
-          className="text-4xl md:text-5xl font-bold text-white tracking-tight"
-          style={{ fontFamily: 'var(--font-grotesk)' }}
-        >
-          Work Experience
-        </h2>
+    <section id="experience" className="relative py-32 px-6 max-w-5xl mx-auto">
+      <Reveal className="mb-16 relative">
+        <span className="numeral absolute -top-16 -left-2 text-[120px] md:text-[180px] select-none pointer-events-none opacity-70">
+          02
+        </span>
+        <div className="relative">
+          <p className="section-label mb-3">Career</p>
+          <h2
+            className="text-4xl md:text-5xl font-bold text-[color:var(--ink)] tracking-tight"
+            style={{ fontFamily: 'var(--font-grotesk)' }}
+          >
+            Work Experience
+          </h2>
+        </div>
       </Reveal>
 
       <div className="relative">
-        <div className="absolute left-0 md:left-8 top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400/40 via-violet-500/20 to-transparent hidden md:block" />
+        <div className="absolute left-0 md:left-8 top-0 bottom-0 w-px bg-gradient-to-b from-[color:var(--coral)]/50 via-[color:var(--amber)]/30 to-transparent hidden md:block" />
 
         <div className="space-y-16">
           {experiences.map((exp, expIdx) => (
             <Reveal key={exp.company} direction="left" delay={expIdx * 80} threshold={0.08}>
               <div className="md:pl-20 relative">
-                <div className="hidden md:flex absolute left-5 top-1 w-6 h-6 rounded-full bg-[#050510] border-2 border-violet-500/60 items-center justify-center shadow-[0_0_16px_rgba(139,92,246,0.5)]">
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-br from-cyan-400 to-violet-500" />
+                <div className="hidden md:flex absolute left-5 top-1 w-6 h-6 rounded-full bg-[color:var(--bg)] border-2 border-[color:var(--coral)]/70 items-center justify-center shadow-[0_0_14px_rgba(255,107,92,0.35)]">
+                  <div className="w-2 h-2 rounded-full bg-[color:var(--coral)]" />
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                   <div>
-                    <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'var(--font-grotesk)' }}>
+                    <h3 className="text-xl font-bold text-[color:var(--ink)]" style={{ fontFamily: 'var(--font-grotesk)' }}>
                       {exp.role}
                     </h3>
-                    <p className="text-cyan-300 font-medium">{exp.company}</p>
+                    <p className="text-[color:var(--coral)] font-medium">{exp.company}</p>
                   </div>
-                  <span className="text-sm text-white/50 glass px-3 py-1 rounded-full self-start sm:self-auto whitespace-nowrap">
+                  <span className="text-sm text-[color:var(--ink-soft)] station px-3 py-1 rounded-full self-start sm:self-auto whitespace-nowrap">
                     {exp.period}
                   </span>
                 </div>
 
-                <p className="text-white/50 text-sm leading-relaxed mb-6">{exp.summary}</p>
+                <p className="text-[color:var(--ink-soft)] text-sm leading-relaxed mb-6">{exp.summary}</p>
 
                 <div className="space-y-3 mb-6">
                   {exp.projects.map((p, pIdx) => (
@@ -301,12 +306,12 @@ export default function Experience() {
 
                 {exp.contributions.length > 0 && (
                   <Reveal>
-                    <div className="glass rounded-xl px-5 py-4">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-3">Team Contributions</p>
+                    <div className="station rounded-xl px-5 py-4">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-[color:var(--ink-soft)] mb-3">Team Contributions</p>
                       <ul className="space-y-2">
                         {exp.contributions.map((c, i) => (
-                          <li key={i} className="flex gap-3 text-sm text-white/50 leading-relaxed">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-fuchsia-400/60 flex-shrink-0" />
+                          <li key={i} className="flex gap-3 text-sm text-[color:var(--ink-soft)] leading-relaxed">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[color:var(--amber)] flex-shrink-0" />
                             {c}
                           </li>
                         ))}

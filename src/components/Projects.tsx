@@ -18,29 +18,29 @@ type Project = {
 
 const ACCENTS = {
   cyan: {
-    text: 'text-cyan-300',
-    glow: 'rgba(103, 232, 249, 0.9)',
-    ring: 'hover:border-cyan-400/50',
+    text: 'text-teal-600',
+    glow: 'rgba(20, 184, 166, 0.9)',
+    ring: 'hover:border-teal-400/60',
   },
   emerald: {
-    text: 'text-emerald-300',
-    glow: 'rgba(52, 211, 153, 0.9)',
-    ring: 'hover:border-emerald-400/50',
+    text: 'text-emerald-600',
+    glow: 'rgba(16, 185, 129, 0.9)',
+    ring: 'hover:border-emerald-400/60',
   },
   violet: {
-    text: 'text-violet-300',
-    glow: 'rgba(139, 92, 246, 0.9)',
-    ring: 'hover:border-violet-400/50',
+    text: 'text-indigo-600',
+    glow: 'rgba(99, 102, 241, 0.9)',
+    ring: 'hover:border-indigo-400/60',
   },
   fuchsia: {
-    text: 'text-fuchsia-300',
-    glow: 'rgba(232, 121, 249, 0.9)',
-    ring: 'hover:border-fuchsia-400/50',
+    text: 'text-rose-600',
+    glow: 'rgba(244, 63, 94, 0.9)',
+    ring: 'hover:border-rose-400/60',
   },
   amber: {
-    text: 'text-amber-300',
-    glow: 'rgba(251, 191, 36, 0.9)',
-    ring: 'hover:border-amber-400/50',
+    text: 'text-amber-600',
+    glow: 'rgba(245, 166, 35, 0.9)',
+    ring: 'hover:border-amber-400/60',
   },
 } as const;
 
@@ -132,10 +132,10 @@ function ProjectCard({ project }: { project: Project }) {
       target="_blank"
       rel="noopener noreferrer"
       onMouseMove={onMouseMove}
-      className={`group panel relative flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/60 ${project.accent.ring}`}
+      className={`group panel relative flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-orange-900/15 ${project.accent.ring}`}
     >
       {/* Live site preview */}
-      <div className="relative overflow-hidden border-b border-white/10 bg-black/40">
+      <div className="relative overflow-hidden border-b border-black/5 bg-black/5">
         <Image
           src={project.image}
           alt={`Screenshot of the ${project.name} website`}
@@ -145,11 +145,11 @@ function ProjectCard({ project }: { project: Project }) {
           className="w-full h-auto aspect-[16/10] object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
         />
         {/* Fade the shot into the card body */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#090916] via-[#090916]/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(255,252,248,0.9)] via-transparent to-transparent" />
         {/* Accent wash on hover */}
         <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-overlay"
-          style={{ background: `linear-gradient(to top, transparent, ${project.accent.glow})` }}
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-multiply"
+          style={{ background: `linear-gradient(to top, transparent, ${project.accent.glow.replace('0.9)', '0.22)')})` }}
         />
       </div>
 
@@ -165,20 +165,20 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="flex items-start justify-between gap-4 mb-2">
           <div>
             <h3
-              className="text-lg font-bold text-white"
+              className="text-lg font-bold text-[color:var(--ink)]"
               style={{ fontFamily: 'var(--font-grotesk)' }}
             >
               {project.name}
             </h3>
             <p className={`text-sm mt-0.5 ${project.accent.text}`}>{project.tagline}</p>
           </div>
-          <span className="flex-shrink-0 mt-1 text-white/40 group-hover:text-white transition-colors">
+          <span className="flex-shrink-0 mt-1 text-[color:var(--ink-soft)] group-hover:text-[color:var(--ink)] transition-colors">
             <ArrowIcon />
           </span>
         </div>
 
         <p
-          className={`text-white/60 leading-relaxed mb-5 ${
+          className={`text-[color:var(--ink-soft)] leading-relaxed mb-5 ${
             project.featured ? 'text-sm' : 'text-[13px]'
           }`}
         >
@@ -189,7 +189,7 @@ function ProjectCard({ project }: { project: Project }) {
           {project.tags.map((t) => (
             <span
               key={t}
-              className="text-[11px] px-2 py-0.5 rounded-full bg-white/[0.07] border border-white/12 text-white/60"
+              className="text-[11px] px-2 py-0.5 rounded-full bg-black/[0.05] border border-black/[0.06] text-[color:var(--ink-soft)]"
             >
               {t}
             </span>
@@ -202,18 +202,23 @@ function ProjectCard({ project }: { project: Project }) {
 
 export default function Projects() {
   return (
-    <section id="projects" className="relative py-28 px-6 max-w-5xl mx-auto">
-      <Reveal className="mb-16">
-        <p className="section-label mb-3">Portfolio</p>
-        <h2
-          className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4"
-          style={{ fontFamily: 'var(--font-grotesk)' }}
-        >
-          Featured Projects
-        </h2>
-        <p className="text-white/55 max-w-md">
-          Personal builds exploring WebGL, motion, and product design on the web.
-        </p>
+    <section id="projects" className="relative py-32 px-6 max-w-5xl mx-auto">
+      <Reveal className="mb-16 relative">
+        <span className="numeral absolute -top-16 -left-2 text-[120px] md:text-[180px] select-none pointer-events-none opacity-70">
+          03
+        </span>
+        <div className="relative">
+          <p className="section-label mb-3">Portfolio</p>
+          <h2
+            className="text-4xl md:text-5xl font-bold text-[color:var(--ink)] tracking-tight mb-4"
+            style={{ fontFamily: 'var(--font-grotesk)' }}
+          >
+            Featured Projects
+          </h2>
+          <p className="text-[color:var(--ink-soft)] max-w-md">
+            Personal builds exploring WebGL, motion, and product design on the web.
+          </p>
+        </div>
       </Reveal>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">

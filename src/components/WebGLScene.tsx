@@ -186,7 +186,14 @@ export default function WebGLScene() {
     const modelPivot = new THREE.Group();
     scene.add(modelPivot);
     let modelReady = false;
-    let mixer: THREE.AnimationMixer | null = null;
+
+    // Procedural "working" animation. The model ships only a single static
+    // pose (no real clip), so we drive the rig ourselves: capture each bone's
+    // posed rotation, then add small offsets every frame to fake typing.
+    type WorkBone = { bone: THREE.Object3D; base: THREE.Quaternion; kind: string; phase: number };
+    let workBones: WorkBone[] = [];
+    const _q = new THREE.Quaternion();
+    const _e = new THREE.Euler();
 
     const loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
@@ -195,12 +202,27 @@ export default function WebGLScene() {
       (gltf) => {
         const model = gltf.scene;
 
-        // Play the (single-pose) clip so the character holds its working pose
+        // Apply the single-pose clip once so the character holds its seated
+        // pose, then keep that as the base for our own animation.
         if (gltf.animations.length) {
-          mixer = new THREE.AnimationMixer(model);
-          mixer.clipAction(gltf.animations[0]).play();
-          mixer.update(0);
+          const m = new THREE.AnimationMixer(model);
+          m.clipAction(gltf.animations[0]).play();
+          m.update(0);
         }
+
+        // Grab the rig bones we'll animate for the "typing" look.
+        model.traverse((o) => {
+          const kindByName: Record<string, string> = {
+            LeftHand: 'handL', RightHand: 'handR',
+            LeftForeArm: 'foreL', RightForeArm: 'foreR',
+            Head: 'head', Spine02: 'spine',
+          };
+          const kind = kindByName[o.name];
+          if (kind) {
+            const phase = kind.endsWith('R') ? 1.4 : 0;
+            workBones.push({ bone: o, base: o.quaternion.clone(), kind, phase });
+          }
+        });
 
         // Scale up and seat the podium base on the ground
         const S = 1.9;
@@ -266,12 +288,35 @@ export default function WebGLScene() {
 
     const renderFrame = () => {
       const t = clock.getElapsedTime();
-      const dt = clock.getDelta();
       progress += (targetProgress - progress) * 0.07;
 
       skyUniforms.uTime.value = t;
       skyUniforms.uProgress.value = progress;
-      if (mixer) mixer.update(dt);
+
+      // Procedural "working" motion — layered on top of the captured pose.
+      if (workBones.length) {
+        // Typing comes in bursts with brief pauses so it doesn't feel robotic.
+        const burst = 0.5 + 0.5 * Math.sin(t * 0.55);
+        const intensity = 0.35 + 0.65 * burst * burst;
+        for (const w of workBones) {
+          if (w.kind === 'handL' || w.kind === 'handR') {
+            const speed = w.kind === 'handL' ? 11 : 12.5;
+            const tap = (0.5 - 0.5 * Math.cos(t * speed + w.phase)) * 0.24 * intensity;
+            _e.set(-tap, 0, tap * 0.4);
+          } else if (w.kind === 'foreL' || w.kind === 'foreR') {
+            const speed = w.kind === 'foreL' ? 11 : 12.5;
+            const tap = (0.5 - 0.5 * Math.cos(t * speed + w.phase)) * 0.07 * intensity;
+            _e.set(-tap, 0, 0);
+          } else if (w.kind === 'head') {
+            _e.set(0.025 * Math.sin(t * 0.5), 0.06 * Math.sin(t * 0.33), 0);
+          } else {
+            // spine — slow breathing
+            _e.set(0.02 * Math.sin(t * 0.8), 0, 0);
+          }
+          _q.setFromEuler(_e);
+          w.bone.quaternion.copy(w.base).multiply(_q);
+        }
+      }
 
       // Grow the model in once loaded
       if (modelReady && modelPivot.scale.x < 1) {

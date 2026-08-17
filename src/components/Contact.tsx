@@ -127,7 +127,7 @@ export default function Contact() {
 
       <Reveal delay={200} className="mt-20 pt-8 border-t border-black/10">
         <p className="text-[color:var(--ink-soft)] text-center text-sm">
-          © {new Date().getFullYear()} Prasadh Pathiraja. Built with Next.js, Three.js &amp; Tailwind CSS.
+          {`© ${new Date().getFullYear()} Prasadh Pathiraja. Built with Next.js, Three.js & Tailwind CSS.`}
         </p>
       </Reveal>
     </section>

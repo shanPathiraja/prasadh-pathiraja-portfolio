@@ -1,14 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  /* Dawn theme — warm, luminous, architectural */
-  --bg: #fbeee3;
-  --ink: #2a1f1a;          /* near-black warm brown for text */
-  --ink-soft: #6b5d54;
-  --coral: #ff6b5c;
-  --amber: #f5a623;
-  --teal: #14b8a6;
-  --indigo: #6366f1;
+  /* Dawn theme, keyed to the 3D model's own palette:
+     denim blue (shirt/jeans), warm wood (desk), charcoal/slate (chair,
+     monitors, podium), against a warm sand sky. */
+  --bg: #f7ece1;
+  --ink: #1e2733;          /* charcoal-navy, matches the monitors/chair */
+  --ink-soft: #5d6b7a;     /* slate grey-blue */
+  --denim: #2f6fb2;        /* primary accent — his shirt / jeans */
+  --denim-deep: #1b4a80;   /* darker denim for depth */
+  --wood: #a4632f;         /* desk timber — warm secondary */
+  --clay: #b5613c;         /* terracotta, ties sky to wood */
+  --leaf: #4f7a3c;         /* the desk plant */
+
+  /* Legacy aliases so existing utility classes keep working */
+  --coral: var(--denim);
+  --amber: var(--wood);
+  --teal: var(--leaf);
+  --indigo: var(--denim-deep);
 }
 
 html {
@@ -22,7 +31,7 @@ body {
 }
 
 ::selection {
-  background: rgba(255, 107, 92, 0.28);
+  background: rgba(47, 111, 178, 0.24);
   color: var(--ink);
 }
 
@@ -34,7 +43,7 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ffb199, #ff6b5c);
+  background: linear-gradient(180deg, #5d94cc, #1b4a80);
   border-radius: 9px;
 }
 
@@ -47,7 +56,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(100deg, var(--coral) 0%, var(--amber) 55%, var(--indigo) 100%);
+  background: linear-gradient(100deg, var(--denim) 0%, var(--clay) 50%, var(--wood) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -86,7 +95,7 @@ body {
   font-weight: 700;
   line-height: 0.8;
   letter-spacing: -0.04em;
-  -webkit-text-stroke: 1.5px rgba(255, 107, 92, 0.55);
+  -webkit-text-stroke: 1.5px rgba(47, 111, 178, 0.5);
   color: transparent;
 }
 
@@ -119,8 +128,8 @@ body {
 
 /* Soft glow for the primary CTA */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 8px 24px -6px rgba(255, 107, 92, 0.55); }
-  50%      { box-shadow: 0 12px 36px -6px rgba(255, 107, 92, 0.8); }
+  0%, 100% { box-shadow: 0 8px 24px -6px rgba(47, 111, 178, 0.5); }
+  50%      { box-shadow: 0 12px 36px -6px rgba(47, 111, 178, 0.75); }
 }
 .glow-cta {
   animation: glow-pulse 3.2s ease-in-out infinite;

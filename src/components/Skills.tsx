@@ -2,35 +2,37 @@
 
 import Reveal from './Reveal';
 
+/* Accents drawn from the 3D model: denim shirt, desk timber, terracotta,
+   slate chair, and the desk plant. */
 const skillGroups = [
   {
     category: 'Frontend & UI',
-    color: 'text-[color:var(--coral)]',
-    dot: 'bg-[color:var(--coral)]',
+    color: 'text-[color:var(--denim)]',
+    dot: 'bg-[color:var(--denim)]',
     skills: ['React', 'Next.js', 'TypeScript', 'JavaScript', 'Tailwind CSS', 'Redux Toolkit', 'HTML5 / CSS3'],
   },
   {
     category: 'Mobile',
-    color: 'text-amber-600',
-    dot: 'bg-amber-500',
+    color: 'text-[color:var(--wood)]',
+    dot: 'bg-[color:var(--wood)]',
     skills: ['Flutter', 'Kotlin', 'Java', 'Firebase App Distribution', 'TestFlight', 'App Store Release', 'Play Store Deployment'],
   },
   {
     category: 'Backend & Data',
-    color: 'text-rose-600',
-    dot: 'bg-rose-500',
+    color: 'text-[color:var(--clay)]',
+    dot: 'bg-[color:var(--clay)]',
     skills: ['Node.js', 'Express.js', 'NestJS', 'REST APIs', 'GraphQL', 'WebSocket', 'Supabase', 'PostgreSQL', 'MongoDB', 'Redis', 'Firebase Firestore'],
   },
   {
     category: 'Cloud & DevOps',
-    color: 'text-indigo-600',
-    dot: 'bg-indigo-500',
+    color: 'text-[color:var(--denim-deep)]',
+    dot: 'bg-[color:var(--denim-deep)]',
     skills: ['AWS (Lambda, EC2, S3)', 'Google Cloud Platform', 'Firebase', 'Docker', 'CI/CD Pipelines', 'Git', 'GitHub / GitLab'],
   },
   {
     category: 'AI & Architecture',
-    color: 'text-teal-600',
-    dot: 'bg-teal-500',
+    color: 'text-[color:var(--leaf)]',
+    dot: 'bg-[color:var(--leaf)]',
     skills: ['GitHub Copilot', 'Claude', 'OpenAI GPT-4', 'Prompt Engineering', 'Microservices', 'Clean Architecture', 'Event-Driven Design', 'Multi-Tenant SaaS'],
   },
 ];

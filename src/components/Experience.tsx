@@ -192,7 +192,7 @@ function ProjectCard({ project }: { project: Project }) {
     <div className="panel rounded-xl overflow-hidden transition-all duration-300 hover:border-[color:var(--coral)]/40 hover:shadow-lg hover:shadow-orange-900/10">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-orange-50/40 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-sky-50/50 transition-colors"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -278,8 +278,8 @@ export default function Experience() {
           {experiences.map((exp, expIdx) => (
             <Reveal key={exp.company} direction="left" delay={expIdx * 80} threshold={0.08}>
               <div className="md:pl-20 relative">
-                <div className="hidden md:flex absolute left-5 top-1 w-6 h-6 rounded-full bg-[color:var(--bg)] border-2 border-[color:var(--coral)]/70 items-center justify-center shadow-[0_0_14px_rgba(255,107,92,0.35)]">
-                  <div className="w-2 h-2 rounded-full bg-[color:var(--coral)]" />
+                <div className="hidden md:flex absolute left-5 top-1 w-6 h-6 rounded-full bg-[color:var(--bg)] border-2 border-[color:var(--denim)]/70 items-center justify-center shadow-[0_0_14px_rgba(47,111,178,0.32)]">
+                  <div className="w-2 h-2 rounded-full bg-[color:var(--denim)]" />
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">

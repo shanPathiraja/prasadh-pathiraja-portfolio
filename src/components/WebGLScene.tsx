@@ -150,7 +150,8 @@ export default function WebGLScene() {
     ground.position.y = -0.02;
     scene.add(ground);
 
-    const grid = new THREE.GridHelper(600, 140, 0xd98c6a, 0xe8b79a);
+    // Grid lines in the model's denim/slate, tying the floor to the character.
+    const grid = new THREE.GridHelper(600, 140, 0x6a8fb5, 0xb59a86);
     (grid.material as THREE.Material).transparent = true;
     (grid.material as THREE.Material).opacity = 0.28;
     grid.position.y = 0;

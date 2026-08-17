@@ -49,7 +49,7 @@ export default function Cursor() {
         className="absolute top-0 left-0 w-64 h-64 rounded-full opacity-30 transition-[scale] duration-300"
         style={{
           background:
-            'radial-gradient(circle, rgba(255,107,92,0.28) 0%, rgba(245,166,35,0.12) 40%, transparent 70%)',
+            'radial-gradient(circle, rgba(47,111,178,0.24) 0%, rgba(181,112,63,0.10) 40%, transparent 70%)',
         }}
       />
       <div

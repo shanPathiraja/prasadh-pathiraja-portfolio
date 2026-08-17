@@ -2,11 +2,11 @@
 
 import Reveal from './Reveal';
 
-/* Warm dawn palette interpolated per letter for the surname. */
+/* Keyed to the 3D model: denim shirt → terracotta → desk timber. */
 const STOPS: [number, number, number][] = [
-  [255, 107, 92],  // coral
-  [245, 166, 35],  // amber
-  [99, 102, 241],  // indigo
+  [47, 111, 178],  // denim
+  [217, 140, 106], // clay
+  [181, 112, 63],  // wood
 ];
 
 function letterColor(t: number) {

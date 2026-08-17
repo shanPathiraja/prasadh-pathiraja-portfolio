@@ -11,36 +11,38 @@ type Project = {
   tags: string[];
   href: string;
   image: string;
-  /** Accent tint, matched to the aurora palette used by the particle field. */
+  /** Accent tint, drawn from the 3D model's palette. */
   accent: { text: string; glow: string; ring: string };
   featured?: boolean;
 };
 
+/* Accents drawn from the 3D model's palette. Key names are legacy; the
+   values are denim / leaf / deep-denim / clay / wood. */
 const ACCENTS = {
   cyan: {
-    text: 'text-teal-600',
-    glow: 'rgba(20, 184, 166, 0.9)',
-    ring: 'hover:border-teal-400/60',
+    text: 'text-[color:var(--denim)]',
+    glow: 'rgba(47, 111, 178, 0.9)',
+    ring: 'hover:border-[color:var(--denim)]/50',
   },
   emerald: {
-    text: 'text-emerald-600',
-    glow: 'rgba(16, 185, 129, 0.9)',
-    ring: 'hover:border-emerald-400/60',
+    text: 'text-[color:var(--leaf)]',
+    glow: 'rgba(79, 122, 60, 0.9)',
+    ring: 'hover:border-[color:var(--leaf)]/50',
   },
   violet: {
-    text: 'text-indigo-600',
-    glow: 'rgba(99, 102, 241, 0.9)',
-    ring: 'hover:border-indigo-400/60',
+    text: 'text-[color:var(--denim-deep)]',
+    glow: 'rgba(27, 74, 128, 0.9)',
+    ring: 'hover:border-[color:var(--denim-deep)]/50',
   },
   fuchsia: {
-    text: 'text-rose-600',
-    glow: 'rgba(244, 63, 94, 0.9)',
-    ring: 'hover:border-rose-400/60',
+    text: 'text-[color:var(--clay)]',
+    glow: 'rgba(181, 97, 60, 0.9)',
+    ring: 'hover:border-[color:var(--clay)]/50',
   },
   amber: {
-    text: 'text-amber-600',
-    glow: 'rgba(245, 166, 35, 0.9)',
-    ring: 'hover:border-amber-400/60',
+    text: 'text-[color:var(--wood)]',
+    glow: 'rgba(164, 99, 47, 0.9)',
+    ring: 'hover:border-[color:var(--wood)]/50',
   },
 } as const;
 

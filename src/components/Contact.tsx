@@ -42,7 +42,7 @@ export default function Contact() {
   ];
 
   const inputClass =
-    'panel text-[color:var(--ink)] placeholder-[color:var(--ink-soft)]/60 focus:border-[color:var(--coral)]/60 focus:bg-orange-50/40 rounded-xl px-4 py-3 outline-none transition-all';
+    'panel text-[color:var(--ink)] placeholder-[color:var(--ink-soft)]/60 focus:border-[color:var(--coral)]/60 focus:bg-sky-50/50 rounded-xl px-4 py-3 outline-none transition-all';
 
   return (
     <section id="contact" className="relative py-32 px-6 max-w-5xl mx-auto">
@@ -75,7 +75,7 @@ export default function Contact() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-5 group"
                 >
-                  <div className="w-11 h-11 rounded-xl station group-hover:border-[color:var(--coral)]/40 group-hover:bg-orange-50/60 flex items-center justify-center transition-all duration-200">
+                  <div className="w-11 h-11 rounded-xl station group-hover:border-[color:var(--coral)]/40 group-hover:bg-sky-50/60 flex items-center justify-center transition-all duration-200">
                     <Icon size={18} className="text-[color:var(--ink-soft)] group-hover:text-[color:var(--coral)] transition-colors" />
                   </div>
                   <div>

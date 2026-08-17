@@ -57,7 +57,7 @@ export default function StationRail() {
               <span
                 className={`absolute inset-0 rounded-full transition-all duration-300 ${
                   on
-                    ? 'bg-[color:var(--coral)] shadow-[0_0_12px_rgba(255,107,92,0.6)]'
+                    ? 'bg-[color:var(--denim)] shadow-[0_0_12px_rgba(47,111,178,0.55)]'
                     : 'bg-[color:var(--ink-soft)]/40 group-hover:bg-[color:var(--ink-soft)]/70'
                 }`}
               />

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
 /* ------------------------------------------------------------------ */
 /* Dawn sky — fullscreen gradient with a low sun bloom                  */
@@ -25,15 +27,15 @@ const SKY_FRAG = /* glsl */ `
     float y = vUv.y;
 
     // Dawn gradient: warm peach at the horizon, pale blue overhead.
-    vec3 low  = vec3(1.00, 0.85, 0.74);   // peach
-    vec3 mid  = vec3(0.98, 0.91, 0.86);   // cream
-    vec3 high = vec3(0.72, 0.83, 0.93);   // pale blue
+    vec3 low  = vec3(1.00, 0.85, 0.74);
+    vec3 mid  = vec3(0.98, 0.91, 0.86);
+    vec3 high = vec3(0.72, 0.83, 0.93);
     vec3 col  = mix(low, mid, smoothstep(0.0, 0.5, y));
     col = mix(col, high, smoothstep(0.42, 1.0, y));
 
     // Sun bloom that drifts along the horizon as you travel.
     vec2 uv = vUv * vec2(uRes.x / uRes.y, 1.0);
-    vec2 sun = vec2((0.35 + 0.3 * sin(uProgress * 1.2)) * uRes.x / uRes.y, 0.34);
+    vec2 sun = vec2((0.35 + 0.3 * sin(uProgress * 3.0)) * uRes.x / uRes.y, 0.32);
     float d = distance(uv, sun);
     col += vec3(1.0, 0.93, 0.82) * smoothstep(0.55, 0.0, d) * 0.5;
     col += vec3(1.0, 0.97, 0.9) * smoothstep(0.12, 0.0, d) * 0.6;
@@ -46,35 +48,38 @@ const SKY_FRAG = /* glsl */ `
   }
 `;
 
-/* ------------------------------------------------------------------ */
-/* Monuments — one distinctive floating form per section               */
-/* ------------------------------------------------------------------ */
+const HORIZON = new THREE.Color(0xf7e4d6);
+const MODEL_URL = '/models/developer.glb';
 
-const HORIZON = new THREE.Color(0xf7e4d6); // fog + ground blend color
-
-type StationSpec = {
-  geometry: () => THREE.BufferGeometry;
-  color: number;
-  x: number;
-  y: number;
-  spin: THREE.Vector3;
-};
-
-const STATIONS: StationSpec[] = [
-  { geometry: () => new THREE.IcosahedronGeometry(3, 0),          color: 0xff6b5c, x: -6.5, y: 0.4,  spin: new THREE.Vector3(0.12, 0.18, 0) },
-  { geometry: () => new THREE.TorusGeometry(3, 0.55, 20, 80),     color: 0xf5a623, x:  6.8, y: 1.0,  spin: new THREE.Vector3(0.2, 0.1, 0.14) },
-  { geometry: () => new THREE.OctahedronGeometry(3.2, 0),         color: 0x2dd4bf, x: -6.8, y: -0.6, spin: new THREE.Vector3(0.1, 0.22, 0) },
-  { geometry: () => new THREE.DodecahedronGeometry(3, 0),         color: 0x6366f1, x:  6.6, y: 0.8,  spin: new THREE.Vector3(0.16, 0.14, 0.1) },
-  { geometry: () => new THREE.TorusKnotGeometry(2, 0.55, 140, 18),color: 0xfb7185, x: -6.4, y: 0.0,  spin: new THREE.Vector3(0.14, 0.2, 0.08) },
+/* Camera orbit keyframes — the "story beats" as you scroll (0..1).
+   Each: azimuth (rad, 0 = front +Z), radius, height, target Y.
+   Kept close and near-level so the workstation fills the frame. */
+const BEATS = [
+  { az: -0.5,  r: 7.4, h: 2.7, ty: 2.3 }, // 01 establishing — the desk
+  { az: 0.4,   r: 6.2, h: 2.2, ty: 2.1 }, // 02 settle in
+  { az: 0.95,  r: 5.6, h: 1.8, ty: 2.0 }, // 03 over toward the monitors
+  { az: 0.2,   r: 6.0, h: 2.4, ty: 2.2 }, // 04 back around, mid
+  { az: -0.4,  r: 7.0, h: 2.8, ty: 2.4 }, // 05 pull back to a calm framing
 ];
 
-const STATION_GAP = 22;
-const FIRST_Z = -12;
-const stationZ = (i: number) => FIRST_Z - i * STATION_GAP;
-const TOTAL_TRAVEL = Math.abs(stationZ(STATIONS.length - 1)); // last monument depth
-const CAM_START = 8;
+// Look slightly right of the model so it sits in the left of the frame,
+// leaving the right side for the content cards.
+const LOOK_X = 2.1;
 
-const SECTION_IDS = ['about', 'experience', 'projects', 'skills', 'contact'];
+function sampleBeats(p: number) {
+  const x = Math.min(1, Math.max(0, p)) * (BEATS.length - 1);
+  const i = Math.min(BEATS.length - 2, Math.floor(x));
+  let f = x - i;
+  f = f * f * (3 - 2 * f); // smoothstep
+  const a = BEATS[i];
+  const b = BEATS[i + 1];
+  return {
+    az: a.az + (b.az - a.az) * f,
+    r: a.r + (b.r - a.r) * f,
+    h: a.h + (b.h - a.h) * f,
+    ty: a.ty + (b.ty - a.ty) * f,
+  };
+}
 
 export default function WebGLScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -87,27 +92,26 @@ export default function WebGLScene() {
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     } catch {
-      return; // WebGL unavailable — page still works without the backdrop
+      return;
     }
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isMobile = window.innerWidth < 768;
     const dpr = Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(dpr);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(HORIZON.getHex(), 30, 120);
+    scene.fog = new THREE.Fog(HORIZON.getHex(), 22, 90);
 
     const camera = new THREE.PerspectiveCamera(
-      52,
+      42,
       window.innerWidth / window.innerHeight,
       0.1,
       400
     );
-    camera.position.set(0, 0.5, CAM_START);
 
-    /* Sky — fullscreen gradient behind everything */
+    /* Sky */
     const skyUniforms = {
       uTime: { value: 0 },
       uProgress: { value: 0 },
@@ -129,89 +133,38 @@ export default function WebGLScene() {
     scene.add(sky);
 
     /* Lighting */
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xffd9b8, 1.15));
-    const sun = new THREE.DirectionalLight(0xfff2e0, 1.5);
-    sun.position.set(-8, 6, 4);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xffd9b8, 1.5));
+    const sun = new THREE.DirectionalLight(0xfff2e0, 2.2);
+    sun.position.set(-6, 8, 5);
     scene.add(sun);
-    const rim = new THREE.DirectionalLight(0xbcd4ff, 0.6);
-    rim.position.set(10, 4, -6);
+    const rim = new THREE.DirectionalLight(0xbcd4ff, 0.7);
+    rim.position.set(8, 3, -6);
     scene.add(rim);
 
-    /* Reflective-looking ground grid receding to the horizon */
+    /* Ground */
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(600, 600, 1, 1),
-      new THREE.MeshStandardMaterial({
-        color: 0xf3ddcb,
-        roughness: 0.85,
-        metalness: 0.0,
-      })
+      new THREE.PlaneGeometry(600, 600),
+      new THREE.MeshStandardMaterial({ color: 0xf3ddcb, roughness: 0.9, metalness: 0 })
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -4.5;
+    ground.position.y = -0.02;
     scene.add(ground);
 
-    const grid = new THREE.GridHelper(600, 120, 0xd98c6a, 0xe8b79a);
+    const grid = new THREE.GridHelper(600, 140, 0xd98c6a, 0xe8b79a);
     (grid.material as THREE.Material).transparent = true;
-    (grid.material as THREE.Material).opacity = 0.35;
-    grid.position.y = -4.48;
+    (grid.material as THREE.Material).opacity = 0.28;
+    grid.position.y = 0;
     scene.add(grid);
 
-    /* Monuments */
-    const monuments: THREE.Group[] = [];
-    STATIONS.forEach((s, i) => {
-      const group = new THREE.Group();
-      const geo = s.geometry();
-
-      const mesh = new THREE.Mesh(
-        geo,
-        new THREE.MeshStandardMaterial({
-          color: s.color,
-          roughness: 0.25,
-          metalness: 0.35,
-          emissive: new THREE.Color(s.color),
-          emissiveIntensity: 0.28, // keep shadowed faces vibrant, not muddy
-          transparent: true,
-          opacity: 0.92,
-          flatShading: true,
-        })
-      );
-      group.add(mesh);
-
-      // Crisp accent edges for an architectural read
-      const edges = new THREE.LineSegments(
-        new THREE.EdgesGeometry(geo),
-        new THREE.LineBasicMaterial({
-          color: new THREE.Color(s.color).offsetHSL(0, 0.1, -0.15),
-          transparent: true,
-          opacity: 0.5,
-        })
-      );
-      group.add(edges);
-
-      // A slow-orbiting satellite ring for extra life
-      const halo = new THREE.Mesh(
-        new THREE.TorusGeometry(4.3, 0.045, 8, 90),
-        new THREE.MeshBasicMaterial({ color: s.color, transparent: true, opacity: 0.28 })
-      );
-      halo.rotation.x = Math.PI / 2.4;
-      group.add(halo);
-
-      group.position.set(isMobile ? s.x * 0.62 : s.x, s.y, stationZ(i));
-      group.userData.spin = s.spin;
-      group.userData.halo = halo;
-      scene.add(group);
-      monuments.push(group);
-    });
-
-    /* Light dust motes drifting along the travel corridor */
-    const MOTE_COUNT = isMobile ? 500 : 1400;
+    /* Ambient dust motes around the workstation */
+    const MOTE_COUNT = window.innerWidth < 768 ? 260 : 700;
     const motePos = new Float32Array(MOTE_COUNT * 3);
-    const moteSeed = new Float32Array(MOTE_COUNT);
     for (let i = 0; i < MOTE_COUNT; i++) {
-      motePos[i * 3] = (Math.random() - 0.5) * 40;
-      motePos[i * 3 + 1] = (Math.random() - 0.5) * 22;
-      motePos[i * 3 + 2] = -Math.random() * (TOTAL_TRAVEL + 40) + 10;
-      moteSeed[i] = Math.random();
+      const r = 3 + Math.random() * 12;
+      const a = Math.random() * Math.PI * 2;
+      motePos[i * 3] = Math.cos(a) * r;
+      motePos[i * 3 + 1] = Math.random() * 8;
+      motePos[i * 3 + 2] = Math.sin(a) * r;
     }
     const moteGeo = new THREE.BufferGeometry();
     moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
@@ -219,9 +172,9 @@ export default function WebGLScene() {
       moteGeo,
       new THREE.PointsMaterial({
         color: 0xffffff,
-        size: 0.08,
+        size: 0.05,
         transparent: true,
-        opacity: 0.55,
+        opacity: 0.5,
         sizeAttenuation: true,
         depthWrite: false,
       })
@@ -229,27 +182,66 @@ export default function WebGLScene() {
     motes.frustumCulled = false;
     scene.add(motes);
 
-    /* Scroll → travel progress (0..1 across the whole document).
-       `?s=N` pins the camera at station N for previewing. */
-    const forcedParam = new URLSearchParams(window.location.search).get('s');
-    const forcedStation = forcedParam === null ? null : parseFloat(forcedParam);
+    /* The developer-at-workstation model — the anchor of the story */
+    const modelPivot = new THREE.Group();
+    scene.add(modelPivot);
+    let modelReady = false;
+    let mixer: THREE.AnimationMixer | null = null;
+
+    const loader = new GLTFLoader();
+    loader.setMeshoptDecoder(MeshoptDecoder);
+    loader.load(
+      MODEL_URL,
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Play the (single-pose) clip so the character holds its working pose
+        if (gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(model);
+          mixer.clipAction(gltf.animations[0]).play();
+          mixer.update(0);
+        }
+
+        // Scale up and seat the podium base on the ground
+        const S = 1.9;
+        model.scale.setScalar(S);
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.x -= center.x;
+        model.position.z -= center.z;
+        model.position.y -= box.min.y; // base at y = 0
+
+        model.traverse((o) => {
+          const m = o as THREE.Mesh;
+          if (m.isMesh) m.frustumCulled = false;
+        });
+
+        modelPivot.add(model);
+        modelPivot.scale.setScalar(0.001); // grow-in
+        modelReady = true;
+      },
+      undefined,
+      (err) => console.error('developer.glb load failed', err)
+    );
+
+    /* Scroll → story progress (0..1). `?p=0.5` freezes a beat for preview. */
+    const forcedParam = new URLSearchParams(window.location.search).get('p');
+    const forced = forcedParam === null ? null : parseFloat(forcedParam);
     let targetProgress = 0;
     const computeProgress = () => {
-      if (forcedStation !== null && !Number.isNaN(forcedStation)) {
-        targetProgress = Math.min(1, Math.max(0, forcedStation / (STATIONS.length - 1)));
+      if (forced !== null && !Number.isNaN(forced)) {
+        targetProgress = Math.min(1, Math.max(0, forced));
         return;
       }
       const max = document.documentElement.scrollHeight - window.innerHeight;
       targetProgress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
     };
 
-    /* Pointer parallax */
     const pointer = new THREE.Vector2(0, 0);
     const onPointerMove = (e: PointerEvent) => {
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
       pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
     };
-
     const onScroll = () => computeProgress();
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -266,35 +258,42 @@ export default function WebGLScene() {
 
     const clock = new THREE.Clock();
     let raf = 0;
-    let progress =
-      forcedStation !== null && !Number.isNaN(forcedStation) ? targetProgress : 0;
+    let progress = forced !== null && !Number.isNaN(forced) ? targetProgress : 0;
 
     const renderFrame = () => {
       const t = clock.getElapsedTime();
+      const dt = clock.getDelta();
       progress += (targetProgress - progress) * 0.07;
 
       skyUniforms.uTime.value = t;
       skyUniforms.uProgress.value = progress;
+      if (mixer) mixer.update(dt);
 
-      // Fly the camera forward along -Z through the monuments, stopping a
-      // consistent ~24 units short of the final one so it frames cleanly.
-      const camZ = CAM_START - progress * (TOTAL_TRAVEL - 4);
-      camera.position.z += (camZ - camera.position.z) * 0.1;
-      camera.position.x += (pointer.x * 1.4 - camera.position.x) * 0.04;
-      camera.position.y += (0.5 + pointer.y * 0.9 - camera.position.y) * 0.04;
-      camera.lookAt(camera.position.x * 0.3, 0.3, camera.position.z - 12);
-
-      // Animate monuments
-      for (const g of monuments) {
-        const spin = g.userData.spin as THREE.Vector3;
-        g.rotation.x += spin.x * 0.01;
-        g.rotation.y += spin.y * 0.01;
-        g.rotation.z += spin.z * 0.01;
-        g.position.y += Math.sin(t * 0.6 + g.position.z) * 0.002;
-        (g.userData.halo as THREE.Mesh).rotation.z += 0.004;
+      // Grow the model in once loaded
+      if (modelReady && modelPivot.scale.x < 1) {
+        modelPivot.scale.setScalar(Math.min(1, modelPivot.scale.x + (1 - modelPivot.scale.x) * 0.08 + 0.004));
       }
+      // Gentle idle turn so the diorama feels alive
+      modelPivot.rotation.y = Math.sin(t * 0.12) * 0.06;
 
-      motes.rotation.y = t * 0.01;
+      // Cinematic orbit around the workstation
+      const b = sampleBeats(progress);
+      // Fit the workstation to the viewport: narrow/portrait pulls the camera
+      // back so nothing is cropped; widescreen frames tighter.
+      const aspect = camera.aspect;
+      const fit = THREE.MathUtils.clamp(1.35 / aspect, 0.85, 1.85);
+      // Only shift the subject off-centre when there's a side column for content.
+      const lookX = LOOK_X * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0.15, 1);
+      const az = b.az + pointer.x * 0.18;
+      const targetPos = new THREE.Vector3(
+        Math.sin(az) * b.r * fit,
+        b.h + pointer.y * 0.6,
+        Math.cos(az) * b.r * fit
+      );
+      camera.position.lerp(targetPos, 0.06);
+      camera.lookAt(lookX, b.ty, 0);
+
+      motes.rotation.y = t * 0.015;
 
       renderer.render(scene, camera);
     };
@@ -319,15 +318,24 @@ export default function WebGLScene() {
     };
 
     if (reducedMotion) {
-      renderFrame();
-      const staticScroll = () => {
+      const staticRender = () => {
         computeProgress();
         progress = targetProgress;
-        renderFrame();
+        const b = sampleBeats(progress);
+        camera.position.set(Math.sin(b.az) * b.r, b.h, Math.cos(b.az) * b.r);
+        camera.lookAt(LOOK_X, b.ty, 0);
+        renderer.render(scene, camera);
       };
-      window.addEventListener('scroll', staticScroll, { passive: true });
+      // Render a few frames so the async model appears, then only on scroll
+      let n = 0;
+      const warm = () => {
+        staticRender();
+        if (n++ < 180) requestAnimationFrame(warm);
+      };
+      warm();
+      window.addEventListener('scroll', staticRender, { passive: true });
       return () => {
-        window.removeEventListener('scroll', staticScroll);
+        window.removeEventListener('scroll', staticRender);
         dispose();
       };
     }

@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env.local
+
+# source 3D model working files (large; optimized copy lives in public/models)
+/model

@@ -51,33 +51,37 @@ const SKY_FRAG = /* glsl */ `
 const HORIZON = new THREE.Color(0xe8f1fa);
 const MODEL_URL = '/models/developer.glb';
 
-/* Camera orbit keyframes — the "story beats" as you scroll (0..1).
-   Each: azimuth (rad, 0 = front +Z), radius, height, target Y.
-   Kept close and near-level so the workstation fills the frame. */
-// Over-the-shoulder orbit: the developer seated at the desk with both
-// screens legible. Stays in the "behind, screens visible" hemisphere so we
-// never face the monitor backs.
-const BEATS = [
-  { az: 0.55, r: 8.2, h: 3.0, ty: 2.6 }, // 01 hero — 3/4 over the shoulder
-  { az: 0.05, r: 7.8, h: 2.9, ty: 2.6 }, // 02 settle in behind
-  { az: -0.5, r: 7.8, h: 2.8, ty: 2.6 }, // 03 around to the other shoulder
-  { az: 0.2,  r: 7.8, h: 3.0, ty: 2.6 }, // 04 back toward centre
-  { az: 0.6,  r: 8.4, h: 3.1, ty: 2.7 }, // 05 calm framing
+/* One beat per section. The camera orbits a focus point *inside* the diorama,
+   so each section frames the thing it is about. Focus coords were measured
+   from the loaded rig (head ≈ y 4.5, hands/keyboard ≈ y 3.7, model ≈ ±3.1).
+   az is the orbit angle: 0 sits behind the figure, positive swings to +X.
+   Stays in the "behind" hemisphere so we never face the monitor backs. */
+type Beat = { az: number; r: number; elev: number; fx: number; fy: number; fz: number };
+
+const BEATS: Beat[] = [
+  // 01 About — the developer himself
+  { az: 0.62, r: 4.4, elev: 0.3, fx: 0.43, fy: 4.15, fz: 0.0 },
+  // 02 Experience — over the left shoulder onto the code editor
+  { az: -0.5, r: 3.6, elev: 0.35, fx: -0.75, fy: 4.2, fz: -1.25 },
+  // 03 Projects — over the right shoulder onto the website screen
+  { az: 0.55, r: 3.6, elev: 0.35, fx: 1.05, fy: 4.2, fz: -1.25 },
+  // 04 Skills — down onto the desk: keyboard, mouse, plant
+  { az: 0.45, r: 3.0, elev: 1.3, fx: 0.6, fy: 3.75, fz: -0.7 },
+  // 05 Contact — pull back to the whole workstation
+  { az: 0.55, r: 8.6, elev: 2.6, fx: 0.2, fy: 3.3, fz: -0.4 },
 ];
 
-
-function sampleBeats(p: number) {
+function sampleBeats(p: number): Beat {
   const x = Math.min(1, Math.max(0, p)) * (BEATS.length - 1);
   const i = Math.min(BEATS.length - 2, Math.floor(x));
   let f = x - i;
   f = f * f * (3 - 2 * f); // smoothstep
   const a = BEATS[i];
   const b = BEATS[i + 1];
+  const mix = (k: keyof Beat) => a[k] + (b[k] - a[k]) * f;
   return {
-    az: a.az + (b.az - a.az) * f,
-    r: a.r + (b.r - a.r) * f,
-    h: a.h + (b.h - a.h) * f,
-    ty: a.ty + (b.ty - a.ty) * f,
+    az: mix('az'), r: mix('r'), elev: mix('elev'),
+    fx: mix('fx'), fy: mix('fy'), fz: mix('fz'),
   };
 }
 
@@ -254,6 +258,9 @@ export default function WebGLScene() {
     // Debug: force the wide/narrow framing factor regardless of aspect.
     const wideParam = params.get('wide');
     const forcedWide = wideParam === null ? null : parseFloat(wideParam);
+    // When a beat is pinned for debugging, skip the easing so the framing is
+    // immediately what it will settle to.
+    const snap = forcedParam !== null && !Number.isNaN(parseFloat(forcedParam));
     let targetProgress = 0;
     const computeProgress = () => {
       if (forced !== null && !Number.isNaN(forced)) {
@@ -325,9 +332,11 @@ export default function WebGLScene() {
         }
       }
 
-      // Grow the model in once loaded
+      // Grow the model in once loaded (instant when a beat is pinned for debug)
       if (modelReady && modelPivot.scale.x < 1) {
-        modelPivot.scale.setScalar(Math.min(1, modelPivot.scale.x + (1 - modelPivot.scale.x) * 0.08 + 0.004));
+        modelPivot.scale.setScalar(
+          snap ? 1 : Math.min(1, modelPivot.scale.x + (1 - modelPivot.scale.x) * 0.08 + 0.004)
+        );
       }
       // Gentle idle turn so the diorama feels alive
       modelPivot.rotation.y = Math.sin(t * 0.12) * 0.06;
@@ -340,25 +349,25 @@ export default function WebGLScene() {
         forcedWide !== null && !Number.isNaN(forcedWide)
           ? forcedWide
           : THREE.MathUtils.clamp((aspect - 0.72) / (1.5 - 0.72), 0, 1);
-      // Wide layouts (card beside the model) crop tight on the developer to
-      // avoid the baked chair-on-desk look; narrow layouts (card over the
-      // model) pull back so the whole workstation reads as a soft backdrop.
-      const fit = THREE.MathUtils.lerp(1.4, 1.0, wide);
+      // Narrow/portrait layouts pull back so the tight framings aren't cropped
+      // and the workstation reads as a soft backdrop behind the content card.
+      const fit = THREE.MathUtils.lerp(1.5, 1.0, wide);
       const effR = b.r * fit;
-      // Narrow looks lower (whole scene); wide crops up to the person.
-      const tyEff = b.ty - (1 - wide) * 0.5;
-      // Shift the subject left (leaving room for the card) only when there's a
-      // side column, and scale it with distance so the screen-space offset is
-      // consistent whether the camera is tight or wide.
-      const lookX = 0.28 * effR * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0, 1);
       const az = b.az + pointer.x * 0.18;
+
+      // Orbit the beat's focus point rather than the world origin.
       const targetPos = new THREE.Vector3(
-        Math.sin(az) * effR,
-        b.h + (1 - wide) * 0.7 + pointer.y * 0.6,
-        Math.cos(az) * effR
+        b.fx + Math.sin(az) * effR,
+        b.fy + b.elev * fit + pointer.y * 0.5,
+        b.fz + Math.cos(az) * effR
       );
-      camera.position.lerp(targetPos, 0.06);
-      camera.lookAt(lookX, tyEff, 0);
+      camera.position.lerp(targetPos, snap ? 1 : 0.06);
+
+      // Shift the look target right (subject sits left) only when there's a
+      // side column for content; scaled with distance so the screen-space
+      // offset stays consistent whether the shot is tight or wide.
+      const lookX = 0.26 * effR * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0, 1);
+      camera.lookAt(b.fx + lookX, b.fy, b.fz);
 
       motes.rotation.y = t * 0.015;
 
@@ -391,16 +400,15 @@ export default function WebGLScene() {
         const b = sampleBeats(progress);
         const aspect = camera.aspect;
         const wide = THREE.MathUtils.clamp((aspect - 0.72) / (1.5 - 0.72), 0, 1);
-        const fit = THREE.MathUtils.lerp(1.4, 1.0, wide);
+        const fit = THREE.MathUtils.lerp(1.5, 1.0, wide);
         const effR = b.r * fit;
-        const tyEff = b.ty - (1 - wide) * 0.5;
-        const lookX = 0.28 * effR * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0, 1);
+        const lookX = 0.26 * effR * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0, 1);
         camera.position.set(
-          Math.sin(b.az) * effR,
-          b.h + (1 - wide) * 0.7,
-          Math.cos(b.az) * effR
+          b.fx + Math.sin(b.az) * effR,
+          b.fy + b.elev * fit,
+          b.fz + Math.cos(b.az) * effR
         );
-        camera.lookAt(lookX, tyEff, 0);
+        camera.lookAt(b.fx + lookX, b.fy, b.fz);
         renderer.render(scene, camera);
       };
       // Render a few frames so the async model appears, then only on scroll

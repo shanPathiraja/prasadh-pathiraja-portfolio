@@ -300,12 +300,18 @@ export default function WebGLScene() {
         const intensity = 0.35 + 0.65 * burst * burst;
         for (const w of workBones) {
           if (w.kind === 'handL' || w.kind === 'handR') {
-            const speed = w.kind === 'handL' ? 11 : 12.5;
-            const tap = (0.5 - 0.5 * Math.cos(t * speed + w.phase)) * 0.24 * intensity;
-            _e.set(-tap, 0, tap * 0.4);
+            // Small, fast, irregular flutter — several frequencies summed so it
+            // reads like separate fingers tapping keys, not one wrist flap.
+            const p = w.phase;
+            const flutter =
+              Math.sin(t * 17 + p) +
+              Math.sin(t * 23 + p * 1.7) +
+              Math.sin(t * 13 + p * 0.6);
+            const tap = Math.max(0, flutter) * 0.028 * intensity;
+            _e.set(-tap, 0, tap * 0.25);
           } else if (w.kind === 'foreL' || w.kind === 'foreR') {
-            const speed = w.kind === 'foreL' ? 11 : 12.5;
-            const tap = (0.5 - 0.5 * Math.cos(t * speed + w.phase)) * 0.07 * intensity;
+            // Forearms stay almost planted; only a whisper of follow-through.
+            const tap = (0.5 - 0.5 * Math.cos(t * 6 + w.phase)) * 0.012 * intensity;
             _e.set(-tap, 0, 0);
           } else if (w.kind === 'head') {
             _e.set(0.025 * Math.sin(t * 0.5), 0.06 * Math.sin(t * 0.33), 0);

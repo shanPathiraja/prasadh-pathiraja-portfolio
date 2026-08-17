@@ -54,17 +54,17 @@ const MODEL_URL = '/models/developer.glb';
 /* Camera orbit keyframes — the "story beats" as you scroll (0..1).
    Each: azimuth (rad, 0 = front +Z), radius, height, target Y.
    Kept close and near-level so the workstation fills the frame. */
+// Tight framing on the developer + screen glow. The model bakes the chair
+// onto the desktop, so we crop the desk base / podium out of frame and aim
+// at chest height — reads as a person at their screens, not on a table.
 const BEATS = [
-  { az: -0.5,  r: 7.4, h: 2.7, ty: 2.3 }, // 01 establishing — the desk
-  { az: 0.4,   r: 6.2, h: 2.2, ty: 2.1 }, // 02 settle in
-  { az: 0.95,  r: 5.6, h: 1.8, ty: 2.0 }, // 03 over toward the monitors
-  { az: 0.2,   r: 6.0, h: 2.4, ty: 2.2 }, // 04 back around, mid
-  { az: -0.4,  r: 7.0, h: 2.8, ty: 2.4 }, // 05 pull back to a calm framing
+  { az: -0.4, r: 5.0, h: 2.6, ty: 3.3 }, // 01 hero
+  { az: 0.3,  r: 4.6, h: 2.5, ty: 3.2 }, // 02 settle in
+  { az: 0.8,  r: 4.4, h: 2.4, ty: 3.1 }, // 03 toward the monitors
+  { az: 0.15, r: 4.6, h: 2.5, ty: 3.2 }, // 04 back around, mid
+  { az: -0.4, r: 5.0, h: 2.7, ty: 3.3 }, // 05 calm framing
 ];
 
-// Look slightly right of the model so it sits in the left of the frame,
-// leaving the right side for the content cards.
-const LOOK_X = 2.1;
 
 function sampleBeats(p: number) {
   const x = Math.min(1, Math.max(0, p)) * (BEATS.length - 1);
@@ -225,8 +225,12 @@ export default function WebGLScene() {
     );
 
     /* Scroll → story progress (0..1). `?p=0.5` freezes a beat for preview. */
-    const forcedParam = new URLSearchParams(window.location.search).get('p');
+    const params = new URLSearchParams(window.location.search);
+    const forcedParam = params.get('p');
     const forced = forcedParam === null ? null : parseFloat(forcedParam);
+    // Debug: force the wide/narrow framing factor regardless of aspect.
+    const wideParam = params.get('wide');
+    const forcedWide = wideParam === null ? null : parseFloat(wideParam);
     let targetProgress = 0;
     const computeProgress = () => {
       if (forced !== null && !Number.isNaN(forced)) {
@@ -278,20 +282,31 @@ export default function WebGLScene() {
 
       // Cinematic orbit around the workstation
       const b = sampleBeats(progress);
-      // Fit the workstation to the viewport: narrow/portrait pulls the camera
-      // back so nothing is cropped; widescreen frames tighter.
       const aspect = camera.aspect;
-      const fit = THREE.MathUtils.clamp(1.35 / aspect, 0.85, 1.85);
-      // Only shift the subject off-centre when there's a side column for content.
-      const lookX = LOOK_X * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0.15, 1);
+      // wide → 1, narrow/portrait → 0
+      const wide =
+        forcedWide !== null && !Number.isNaN(forcedWide)
+          ? forcedWide
+          : THREE.MathUtils.clamp((aspect - 0.72) / (1.5 - 0.72), 0, 1);
+      // Wide layouts (card beside the model) crop tight on the developer to
+      // avoid the baked chair-on-desk look; narrow layouts (card over the
+      // model) pull back so the whole workstation reads as a soft backdrop.
+      const fit = THREE.MathUtils.lerp(1.55, 0.85, wide);
+      const effR = b.r * fit;
+      // Narrow looks lower (whole scene); wide crops up to the person.
+      const tyEff = b.ty - (1 - wide) * 1.0;
+      // Shift the subject left (leaving room for the card) only when there's a
+      // side column, and scale it with distance so the screen-space offset is
+      // consistent whether the camera is tight or wide.
+      const lookX = 0.28 * effR * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0, 1);
       const az = b.az + pointer.x * 0.18;
       const targetPos = new THREE.Vector3(
-        Math.sin(az) * b.r * fit,
-        b.h + pointer.y * 0.6,
-        Math.cos(az) * b.r * fit
+        Math.sin(az) * effR,
+        b.h + (1 - wide) * 1.1 + pointer.y * 0.6,
+        Math.cos(az) * effR
       );
       camera.position.lerp(targetPos, 0.06);
-      camera.lookAt(lookX, b.ty, 0);
+      camera.lookAt(lookX, tyEff, 0);
 
       motes.rotation.y = t * 0.015;
 
@@ -322,8 +337,18 @@ export default function WebGLScene() {
         computeProgress();
         progress = targetProgress;
         const b = sampleBeats(progress);
-        camera.position.set(Math.sin(b.az) * b.r, b.h, Math.cos(b.az) * b.r);
-        camera.lookAt(LOOK_X, b.ty, 0);
+        const aspect = camera.aspect;
+        const wide = THREE.MathUtils.clamp((aspect - 0.72) / (1.5 - 0.72), 0, 1);
+        const fit = THREE.MathUtils.lerp(1.55, 0.85, wide);
+        const effR = b.r * fit;
+        const tyEff = b.ty - (1 - wide) * 1.0;
+        const lookX = 0.28 * effR * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0, 1);
+        camera.position.set(
+          Math.sin(b.az) * effR,
+          b.h + (1 - wide) * 1.1,
+          Math.cos(b.az) * effR
+        );
+        camera.lookAt(lookX, tyEff, 0);
         renderer.render(scene, camera);
       };
       // Render a few frames so the async model appears, then only on scroll

@@ -54,15 +54,15 @@ const MODEL_URL = '/models/developer.glb';
 /* Camera orbit keyframes — the "story beats" as you scroll (0..1).
    Each: azimuth (rad, 0 = front +Z), radius, height, target Y.
    Kept close and near-level so the workstation fills the frame. */
-// Tight framing on the developer + screen glow. The model bakes the chair
-// onto the desktop, so we crop the desk base / podium out of frame and aim
-// at chest height — reads as a person at their screens, not on a table.
+// Over-the-shoulder orbit: the developer seated at the desk with both
+// screens legible. Stays in the "behind, screens visible" hemisphere so we
+// never face the monitor backs.
 const BEATS = [
-  { az: -0.4, r: 5.0, h: 2.6, ty: 3.3 }, // 01 hero
-  { az: 0.3,  r: 4.6, h: 2.5, ty: 3.2 }, // 02 settle in
-  { az: 0.8,  r: 4.4, h: 2.4, ty: 3.1 }, // 03 toward the monitors
-  { az: 0.15, r: 4.6, h: 2.5, ty: 3.2 }, // 04 back around, mid
-  { az: -0.4, r: 5.0, h: 2.7, ty: 3.3 }, // 05 calm framing
+  { az: 0.55, r: 8.2, h: 3.0, ty: 2.6 }, // 01 hero — 3/4 over the shoulder
+  { az: 0.05, r: 7.8, h: 2.9, ty: 2.6 }, // 02 settle in behind
+  { az: -0.5, r: 7.8, h: 2.8, ty: 2.6 }, // 03 around to the other shoulder
+  { az: 0.2,  r: 7.8, h: 3.0, ty: 2.6 }, // 04 back toward centre
+  { az: 0.6,  r: 8.4, h: 3.1, ty: 2.7 }, // 05 calm framing
 ];
 
 
@@ -291,10 +291,10 @@ export default function WebGLScene() {
       // Wide layouts (card beside the model) crop tight on the developer to
       // avoid the baked chair-on-desk look; narrow layouts (card over the
       // model) pull back so the whole workstation reads as a soft backdrop.
-      const fit = THREE.MathUtils.lerp(1.55, 0.85, wide);
+      const fit = THREE.MathUtils.lerp(1.4, 1.0, wide);
       const effR = b.r * fit;
       // Narrow looks lower (whole scene); wide crops up to the person.
-      const tyEff = b.ty - (1 - wide) * 1.0;
+      const tyEff = b.ty - (1 - wide) * 0.5;
       // Shift the subject left (leaving room for the card) only when there's a
       // side column, and scale it with distance so the screen-space offset is
       // consistent whether the camera is tight or wide.
@@ -302,7 +302,7 @@ export default function WebGLScene() {
       const az = b.az + pointer.x * 0.18;
       const targetPos = new THREE.Vector3(
         Math.sin(az) * effR,
-        b.h + (1 - wide) * 1.1 + pointer.y * 0.6,
+        b.h + (1 - wide) * 0.7 + pointer.y * 0.6,
         Math.cos(az) * effR
       );
       camera.position.lerp(targetPos, 0.06);
@@ -339,13 +339,13 @@ export default function WebGLScene() {
         const b = sampleBeats(progress);
         const aspect = camera.aspect;
         const wide = THREE.MathUtils.clamp((aspect - 0.72) / (1.5 - 0.72), 0, 1);
-        const fit = THREE.MathUtils.lerp(1.55, 0.85, wide);
+        const fit = THREE.MathUtils.lerp(1.4, 1.0, wide);
         const effR = b.r * fit;
-        const tyEff = b.ty - (1 - wide) * 1.0;
+        const tyEff = b.ty - (1 - wide) * 0.5;
         const lookX = 0.28 * effR * THREE.MathUtils.clamp((aspect - 0.8) / 0.7, 0, 1);
         camera.position.set(
           Math.sin(b.az) * effR,
-          b.h + (1 - wide) * 1.1,
+          b.h + (1 - wide) * 0.7,
           Math.cos(b.az) * effR
         );
         camera.lookAt(lookX, tyEff, 0);

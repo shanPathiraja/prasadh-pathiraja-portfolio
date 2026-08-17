@@ -58,7 +58,7 @@ export default function Skills() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {skillGroups.map((g, i) => (
           <Reveal key={g.category} delay={i * 80} threshold={0.1}>
-            <div className="group relative station rounded-2xl p-5 h-full transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-orange-900/10 overflow-hidden">
+            <div className="group relative station rounded-2xl p-5 h-full transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-900/12 overflow-hidden">
               <div className={`absolute top-0 left-0 right-0 h-0.5 ${g.dot} opacity-70`} />
               <h3 className={`text-xs font-bold tracking-widest uppercase mb-5 ${g.color}`}>
                 {g.category}

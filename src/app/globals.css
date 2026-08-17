@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  /* Dawn theme, keyed to the 3D model's own palette:
+  /* Tech theme, keyed to the 3D model's own palette:
      denim blue (shirt/jeans), warm wood (desk), charcoal/slate (chair,
-     monitors, podium), against a warm sand sky. */
-  --bg: #f7ece1;
+     monitors, podium), against a cool steel-blue sky. */
+  --bg: #e9f0f7;
   --ink: #1e2733;          /* charcoal-navy, matches the monitors/chair */
   --ink-soft: #5d6b7a;     /* slate grey-blue */
   --denim: #2f6fb2;        /* primary accent — his shirt / jeans */
@@ -71,20 +71,20 @@ body {
 
 /* Frosted card — the "station" surface. Light + legible over the 3D sky. */
 .station {
-  background: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 10px 40px -12px rgba(120, 70, 40, 0.22),
-    0 2px 8px -2px rgba(120, 70, 40, 0.12);
+    0 10px 40px -12px rgba(24, 52, 88, 0.24),
+    0 2px 8px -2px rgba(24, 52, 88, 0.13);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
 }
 
 /* Near-opaque panel for dense content blocks */
 .panel {
-  background: rgba(255, 252, 248, 0.9);
-  border: 1px solid rgba(210, 180, 160, 0.35);
-  box-shadow: 0 8px 30px -14px rgba(120, 70, 40, 0.25);
+  background: rgba(252, 254, 255, 0.92);
+  border: 1px solid rgba(150, 178, 205, 0.38);
+  box-shadow: 0 8px 30px -14px rgba(24, 52, 88, 0.28);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }

@@ -189,7 +189,7 @@ function ProjectCard({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="panel rounded-xl overflow-hidden transition-all duration-300 hover:border-[color:var(--coral)]/40 hover:shadow-lg hover:shadow-orange-900/10">
+    <div className="panel rounded-xl overflow-hidden transition-all duration-300 hover:border-[color:var(--denim)]/40 hover:shadow-lg hover:shadow-slate-900/12">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-sky-50/50 transition-colors"

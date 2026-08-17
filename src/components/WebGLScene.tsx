@@ -26,19 +26,19 @@ const SKY_FRAG = /* glsl */ `
   void main() {
     float y = vUv.y;
 
-    // Dawn gradient: warm peach at the horizon, pale blue overhead.
-    vec3 low  = vec3(1.00, 0.85, 0.74);
-    vec3 mid  = vec3(0.98, 0.91, 0.86);
-    vec3 high = vec3(0.72, 0.83, 0.93);
+    // Tech gradient: steel blue overhead, luminous cyan-white at the horizon.
+    vec3 low  = vec3(0.92, 0.96, 0.99);
+    vec3 mid  = vec3(0.80, 0.88, 0.95);
+    vec3 high = vec3(0.44, 0.60, 0.80);
     vec3 col  = mix(low, mid, smoothstep(0.0, 0.5, y));
     col = mix(col, high, smoothstep(0.42, 1.0, y));
 
-    // Sun bloom that drifts along the horizon as you travel.
+    // Cool light source drifting along the horizon as you travel.
     vec2 uv = vUv * vec2(uRes.x / uRes.y, 1.0);
     vec2 sun = vec2((0.35 + 0.3 * sin(uProgress * 3.0)) * uRes.x / uRes.y, 0.32);
     float d = distance(uv, sun);
-    col += vec3(1.0, 0.93, 0.82) * smoothstep(0.55, 0.0, d) * 0.5;
-    col += vec3(1.0, 0.97, 0.9) * smoothstep(0.12, 0.0, d) * 0.6;
+    col += vec3(0.52, 0.82, 1.0) * smoothstep(0.55, 0.0, d) * 0.45;
+    col += vec3(0.88, 0.97, 1.0) * smoothstep(0.12, 0.0, d) * 0.6;
 
     // Faint film grain so the flat sky never bands.
     float g = fract(sin(dot(vUv * uRes, vec2(12.99, 78.23))) * 43758.5);
@@ -48,7 +48,7 @@ const SKY_FRAG = /* glsl */ `
   }
 `;
 
-const HORIZON = new THREE.Color(0xf7e4d6);
+const HORIZON = new THREE.Color(0xe8f1fa);
 const MODEL_URL = '/models/developer.glb';
 
 /* Camera orbit keyframes — the "story beats" as you scroll (0..1).
@@ -133,8 +133,8 @@ export default function WebGLScene() {
     scene.add(sky);
 
     /* Lighting */
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xffd9b8, 1.5));
-    const sun = new THREE.DirectionalLight(0xfff2e0, 2.2);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xd2e2f2, 1.5));
+    const sun = new THREE.DirectionalLight(0xfffaf4, 2.2);
     sun.position.set(-6, 8, 5);
     scene.add(sun);
     const rim = new THREE.DirectionalLight(0xbcd4ff, 0.7);
@@ -144,14 +144,14 @@ export default function WebGLScene() {
     /* Ground */
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(600, 600),
-      new THREE.MeshStandardMaterial({ color: 0xf3ddcb, roughness: 0.9, metalness: 0 })
+      new THREE.MeshStandardMaterial({ color: 0xdde7f1, roughness: 0.9, metalness: 0 })
     );
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.02;
     scene.add(ground);
 
-    // Grid lines in the model's denim/slate, tying the floor to the character.
-    const grid = new THREE.GridHelper(600, 140, 0x6a8fb5, 0xb59a86);
+    // Blueprint-style grid in denim/slate, tying the floor to the character.
+    const grid = new THREE.GridHelper(600, 140, 0x4a7fb5, 0x9db4c8);
     (grid.material as THREE.Material).transparent = true;
     (grid.material as THREE.Material).opacity = 0.28;
     grid.position.y = 0;

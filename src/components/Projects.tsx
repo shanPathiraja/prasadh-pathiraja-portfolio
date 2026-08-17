@@ -134,7 +134,7 @@ function ProjectCard({ project }: { project: Project }) {
       target="_blank"
       rel="noopener noreferrer"
       onMouseMove={onMouseMove}
-      className={`group panel relative flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-orange-900/15 ${project.accent.ring}`}
+      className={`group panel relative flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-900/18 ${project.accent.ring}`}
     >
       {/* Live site preview */}
       <div className="relative overflow-hidden border-b border-black/5 bg-black/5">
@@ -147,7 +147,7 @@ function ProjectCard({ project }: { project: Project }) {
           className="w-full h-auto aspect-[16/10] object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
         />
         {/* Fade the shot into the card body */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(255,252,248,0.9)] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(252,254,255,0.92)] via-transparent to-transparent" />
         {/* Accent wash on hover */}
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 mix-blend-multiply"

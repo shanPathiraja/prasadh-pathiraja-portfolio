@@ -5,7 +5,8 @@
   --paper: #f0eee7;
   --paper-deep: #dedbd0;
   --signal: #c7ff36;
-  --blue: #3157ff;
+  --blue: #3157ff;        /* accent: links, rules, small marks */
+  --blue-deep: #22307d;   /* large colour fields — calmer, lets lime read cleanly */
   --orange: #ff5c35;
   --muted: #6b6a63;
   --line: rgba(17, 17, 15, 0.18);
@@ -193,7 +194,21 @@ main, footer { margin-left: var(--side); }
 .skill-row h3 { margin: 0 0 .55rem; font: 700 1.4rem var(--font-display); letter-spacing: -.04em; }
 .skill-row p { margin: 0; font-size: .68rem; line-height: 1.6; }
 
-.contact { display: grid; grid-template-columns: 1fr 1fr; gap: 10vw; background: var(--blue); color: #fff; }
+.contact {
+  position: relative; isolation: isolate;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10vw;
+  background: var(--blue-deep); color: #fff;
+}
+/* Faint grid so the panel has the same drafted structure as the rest of the
+   page instead of reading as one flat slab of colour. */
+.contact::before {
+  content: ''; position: absolute; z-index: -1; inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 4.5rem 4.5rem;
+  mask-image: linear-gradient(to top, #000, transparent 88%);
+}
 .contact .eyebrow { margin-bottom: 4rem; }
 .contact h2 { font-size: clamp(4rem, 7vw, 7.5rem); }
 .contact-script { margin: -.4rem 0 3rem; color: var(--signal); font: italic 400 clamp(3rem, 5vw, 5rem)/1 Georgia; transform: rotate(-4deg); }

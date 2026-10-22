@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#11110f"/>
-  <text x="31" y="43" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="bold" letter-spacing="-3" text-anchor="middle" fill="#f0eee7">PP</text>
+  <rect width="64" height="64" fill="#0c0c0d"/>
+  <text x="31" y="43" font-family="Helvetica, Arial, sans-serif" font-size="30" font-weight="bold" letter-spacing="-3" text-anchor="middle" fill="#ece9e2">PP</text>
   <circle cx="53" cy="40" r="4" fill="#c7ff36"/>
 </svg>

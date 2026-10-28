@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Download } from './Icons';
 
-export const navItems = [
-  { id: 'home', label: 'Start', number: '01' },
-  { id: 'experience', label: 'Experience', number: '02' },
-  { id: 'work', label: 'Selected work', number: '03' },
-  { id: 'skills', label: 'Skills', number: '04' },
-  { id: 'contact', label: 'Contact', number: '05' },
+export const NAV = [
+  { id: 'home', label: 'Home' },
+  { id: 'about', label: 'About' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'contact', label: 'Contact' },
 ];
 
 export const SOCIALS = {
@@ -17,92 +19,96 @@ export const SOCIALS = {
 };
 
 export default function Nav() {
+  const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('home');
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Which section the side rail highlights
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
     const spy = new IntersectionObserver(
       (entries) =>
-        entries.forEach(
-          (entry) => entry.isIntersecting && setActive(entry.target.id)
-        ),
-      { rootMargin: '-35% 0px -55% 0px' }
+        entries.forEach((e) => e.isIntersecting && setActive(e.target.id)),
+      { rootMargin: '-45% 0px -50% 0px' }
     );
-    navItems.forEach(({ id }) => {
+    NAV.forEach(({ id }) => {
       const el = document.getElementById(id);
       if (el) spy.observe(el);
     });
 
-    // Adds .in-view so the CSS entrance transitions fire once per section
+    // Section entrance animations
     const reveal = new IntersectionObserver(
       (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('in-view');
-            reveal.unobserve(entry.target);
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('in-view');
+            reveal.unobserve(e.target);
           }
         }),
       { threshold: 0.12 }
     );
-    document
-      .querySelectorAll('main section:not(.hero)')
-      .forEach((section) => reveal.observe(section));
+    document.querySelectorAll('section').forEach((s) => reveal.observe(s));
 
     return () => {
+      window.removeEventListener('scroll', onScroll);
       spy.disconnect();
       reveal.disconnect();
     };
   }, []);
 
   return (
-    <>
-      <header className="mobile-header">
-        <a className="monogram" href="#home" aria-label="Prasadh Pathiraja, home">
-          PP<span>.</span>
-        </a>
-        <a className="availability-mini" href="#contact">
-          <i /> Available
-        </a>
-      </header>
-
-      <aside className="side-nav" aria-label="Primary navigation">
-        <a className="monogram" href="#home" aria-label="Prasadh Pathiraja, home">
-          PP<span>.</span>
-        </a>
-        <nav>
-          {navItems.map((item) => (
-            <a
-              className={active === item.id ? 'active' : ''}
-              href={`#${item.id}`}
-              key={item.id}
-            >
-              <span>{item.number}</span>
-              {item.label}
-            </a>
-          ))}
-        </nav>
-        <div className="side-socials">
-          <a href={SOCIALS.github} target="_blank" rel="noreferrer" aria-label="GitHub">
-            GH
+    <header className={`nav${scrolled ? ' scrolled' : ''}`}>
+      <div className="shell">
+        <div className="nav-in">
+          <a className="brand" href="#home" aria-label="Buddhika Prasadh Pathiraja, home">
+            <span className="brand-mark">BP</span>
+            <span className="brand-text">
+              <strong>Buddhika Prasadh Pathiraja</strong>
+              <span>Full-Stack Software Engineer</span>
+            </span>
           </a>
-          <a href={SOCIALS.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
-            IN
-          </a>
-        </div>
-      </aside>
 
-      <nav className="mobile-nav" aria-label="Mobile navigation">
-        {navItems.map((item) => (
-          <a
-            className={active === item.id ? 'active' : ''}
-            href={`#${item.id}`}
-            key={item.id}
+          <nav className="nav-links">
+            {NAV.map((n) => (
+              <a key={n.id} href={`#${n.id}`} className={active === n.id ? 'active' : ''}>
+                {n.label}
+              </a>
+            ))}
+          </nav>
+
+          <a className="btn btn-ghost" href={`mailto:${SOCIALS.email}`}>
+            <Download /> Download CV
+          </a>
+
+          <button
+            className="nav-toggle"
+            aria-label="Toggle menu"
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
           >
-            <span>{item.number}</span>
-            {item.label.split(' ')[0]}
-          </a>
-        ))}
-      </nav>
-    </>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8">
+              {open ? <path d="M6 6l12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
+        </div>
+
+        {open && (
+          <nav className="nav-mobile">
+            {NAV.map((n) => (
+              <a
+                key={n.id}
+                href={`#${n.id}`}
+                className={active === n.id ? 'active' : ''}
+                onClick={() => setOpen(false)}
+              >
+                {n.label}
+              </a>
+            ))}
+          </nav>
+        )}
+      </div>
+    </header>
   );
 }

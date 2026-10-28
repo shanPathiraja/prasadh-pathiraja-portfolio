@@ -1,23 +1,25 @@
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
-import Experience from '@/components/Experience';
-import Work from '@/components/Work';
+import About from '@/components/About';
 import Skills from '@/components/Skills';
+import Projects from '@/components/Projects';
+import Experience from '@/components/Experience';
 import Contact from '@/components/Contact';
 import SiteFooter from '@/components/SiteFooter';
 
 export default function Home() {
   return (
-    <div className="site-shell">
+    <>
       <Nav />
       <main>
         <Hero />
-        <Experience />
-        <Work />
+        <About />
         <Skills />
+        <Projects />
+        <Experience />
         <Contact />
       </main>
       <SiteFooter />
-    </div>
+    </>
   );
 }

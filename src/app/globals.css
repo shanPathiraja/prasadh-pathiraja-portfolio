@@ -94,23 +94,59 @@ button, input, textarea { font: inherit; }
 .nav-mobile { display: none; }
 
 /* ---------- hero ---------- */
-.hero { position: relative; min-height: 100svh; display: flex; align-items: center; overflow: hidden; }
+/* Scroll-scrubbed hero. Without JS (or with reduced motion) this stays a normal 100vh
+   band that autoplays; .hero[data-scrub] is set by Hero.tsx once it can drive the frames. */
+.hero { position: relative; }
+.hero-stage {
+  position: relative; height: 100svh; display: flex; align-items: center; overflow: hidden;
+}
+.hero[data-scrub] { height: 340vh; }
+.hero[data-scrub] .hero-stage { position: sticky; top: 0; }
+
 /* Flat base by default: the <video>'s own poster covers the pre-playback moment, so the
    heavier still is only fetched on the reduced-motion path that actually needs it. */
 .hero-bg { position: absolute; inset: 0; z-index: 1; background: var(--bg); }
-/* The shot runs once and rests on its last frame; no loop, so it settles into the hero. */
+/* Scrubbed by scroll, so it holds whatever frame the scroll position maps to. */
 .hero-video {
   position: absolute; inset: 0; z-index: 2;
   width: 100%; height: 100%; object-fit: cover;
   animation: fade 600ms ease-out both;
 }
-/* One scrim over both layers, so the copy reads the same whether the video plays or not. */
+/* One scrim over both layers, so the copy reads the same whether the video plays or not.
+   It deepens as the shot runs out, easing the handover to the next section. */
 .hero-scrim {
   position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:
     linear-gradient(100deg, rgba(6,11,22,.94) 0%, rgba(6,11,22,.78) 36%, rgba(6,11,22,.22) 68%, rgba(6,11,22,.5) 100%),
     linear-gradient(to bottom, rgba(6,11,22,.72), transparent 28%, rgba(6,11,22,.9));
 }
+.hero-scrim::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--bg); opacity: calc((var(--p, 0) - .78) * 2);
+}
+
+/* Parallax: each layer leaves at its own rate while the frames advance underneath. */
+.hero[data-scrub] .hero-in {
+  transform: translate3d(0, calc(var(--p, 0) * -7rem), 0);
+  opacity: calc((.85 - var(--p, 0)) / .5);
+  will-change: transform, opacity;
+}
+.hero[data-scrub] .hero-note {
+  transform: translate3d(0, calc(var(--p, 0) * -14rem), 0);
+  opacity: calc(1 - var(--p, 0) * 2.4);
+}
+.hero[data-scrub] .hero-chips {
+  transform: translate3d(calc(var(--p, 0) * 9rem), 0, 0);
+  opacity: calc(1 - var(--p, 0) * 2.8);
+}
+.hero[data-scrub] .scroll-cue { opacity: calc(1 - var(--p, 0) * 5); }
+.hero-stage[data-faded] .hero-in { pointer-events: none; }
+
+/* The reveal is driven by scroll now, so nothing should sit behind a long timed delay. */
+.hero[data-scrub] .hero-copy { animation-delay: 400ms; }
+.hero[data-scrub] .hero-note p { animation-delay: 800ms; }
+.hero[data-scrub] .hero-chips-in { animation-delay: 700ms; }
+.hero[data-scrub] .scroll-cue-in { animation-delay: 900ms; }
 .hero-in { position: relative; z-index: 4; }
 .hero-copy { max-width: 36rem; animation: rise 900ms cubic-bezier(.22,1,.36,1) 3400ms both; }
 .hello { margin: 0 0 .6rem; color: var(--blue); font-size: 1rem; font-weight: 500; }
@@ -125,19 +161,22 @@ button, input, textarea { font: inherit; }
 }
 .hero p.lead { margin: 0 0 2rem; max-width: 30rem; font-size: .95rem; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; }
-.hero-note { position: absolute; top: 18%; right: 3.5%; z-index: 4; animation: fade 900ms 3900ms both; }
-.scroll-cue {
-  position: absolute; left: 1.6rem; bottom: 18%; z-index: 4; display: flex; flex-direction: column;
-  align-items: center; gap: .9rem; color: var(--muted); animation: fade 900ms 4100ms both;
+.hero-note { position: absolute; top: 18%; right: 3.5%; z-index: 4; pointer-events: none; }
+.hero-note p { margin: 0; animation: fade 900ms 3900ms both; }
+.scroll-cue { position: absolute; left: 1.6rem; bottom: 18%; z-index: 4; color: var(--muted); }
+.scroll-cue-in {
+  display: flex; flex-direction: column; align-items: center; gap: .9rem;
+  animation: fade 900ms 4100ms both;
 }
 .scroll-cue span {
   font-size: .62rem; letter-spacing: .3em; text-transform: uppercase;
   writing-mode: vertical-rl;
 }
 .scroll-cue i { width: 1px; height: 3.4rem; background: linear-gradient(var(--blue), transparent); }
-.hero-chips {
-  position: absolute; right: 0; bottom: 14%; z-index: 4; display: flex; flex-direction: column;
-  gap: .4rem; animation: slide-left 900ms 3700ms both;
+.hero-chips { position: absolute; right: 0; bottom: 14%; z-index: 4; }
+.hero-chips-in {
+  display: flex; flex-direction: column; gap: .4rem;
+  animation: slide-left 900ms 3700ms both;
 }
 .hero-chips b {
   padding: .5rem 1.6rem .5rem 1.1rem; border-radius: .4rem 0 0 .4rem;
@@ -264,6 +303,8 @@ button, input, textarea { font: inherit; }
   .nav-mobile a { padding: .6rem .2rem; color: var(--muted); font-size: .9rem; }
   .nav-mobile a.active { color: var(--blue); }
   .hero-chips, .scroll-cue { display: none; }
+  /* shorter pin on a phone: 3.4 viewports of thumb-scroll before any content is too much */
+  .hero[data-scrub] { height: 230vh; }
   .tech-cats, .proj-grid { grid-template-columns: 1fr; }
   .exp-proj strong { min-width: 100%; }
   .foot-in { flex-direction: column; text-align: center; }
@@ -273,6 +314,6 @@ button, input, textarea { font: inherit; }
   html { scroll-behavior: auto; }
   .hero-video { display: none; }
   .hero-bg { background: url('/hero/hero-still.webp') center/cover; }
-  .hero-copy, .hero-note, .scroll-cue, .hero-chips { animation: none; opacity: 1; transform: none; }
+  .hero-copy, .hero-note p, .scroll-cue-in, .hero-chips-in { animation: none; opacity: 1; transform: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }

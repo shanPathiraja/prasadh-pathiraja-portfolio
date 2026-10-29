@@ -95,30 +95,24 @@ button, input, textarea { font: inherit; }
 
 /* ---------- hero ---------- */
 .hero { position: relative; min-height: 100svh; display: flex; align-items: center; overflow: hidden; }
-.hero-bg, .hero-intro { position: absolute; inset: 0; background-size: cover; background-position: center; }
-.hero-bg { background-image: url('/hero/desk.webp'); }
-.hero-bg::after {
-  content: ''; position: absolute; inset: 0;
+/* Flat base by default: the <video>'s own poster covers the pre-playback moment, so the
+   heavier still is only fetched on the reduced-motion path that actually needs it. */
+.hero-bg { position: absolute; inset: 0; z-index: 1; background: var(--bg); }
+/* The shot runs once and rests on its last frame; no loop, so it settles into the hero. */
+.hero-video {
+  position: absolute; inset: 0; z-index: 2;
+  width: 100%; height: 100%; object-fit: cover;
+  animation: fade 600ms ease-out both;
+}
+/* One scrim over both layers, so the copy reads the same whether the video plays or not. */
+.hero-scrim {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
   background:
-    linear-gradient(100deg, rgba(6,11,22,.96) 0%, rgba(6,11,22,.82) 38%, rgba(6,11,22,.25) 70%, rgba(6,11,22,.55) 100%),
-    linear-gradient(to bottom, rgba(6,11,22,.75), transparent 28%, rgba(6,11,22,.9));
-}
-/* The intro frame sits on top, then scales and dissolves away to reveal the desk. */
-.hero-intro {
-  background-image: url('/hero/intro-logo.webp');
-  z-index: 3; transform-origin: 54% 48%;
-  animation: intro-out 1500ms cubic-bezier(.65,0,.35,1) 1900ms both;
-}
-.hero-intro::after {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(60% 60% at 54% 48%, transparent 30%, rgba(6,11,22,.75) 100%);
-}
-@keyframes intro-out {
-  from { opacity: 1; transform: scale(1); }
-  to   { opacity: 0; transform: scale(1.55); }
+    linear-gradient(100deg, rgba(6,11,22,.94) 0%, rgba(6,11,22,.78) 36%, rgba(6,11,22,.22) 68%, rgba(6,11,22,.5) 100%),
+    linear-gradient(to bottom, rgba(6,11,22,.72), transparent 28%, rgba(6,11,22,.9));
 }
 .hero-in { position: relative; z-index: 4; }
-.hero-copy { max-width: 36rem; animation: rise 900ms cubic-bezier(.22,1,.36,1) 3000ms both; }
+.hero-copy { max-width: 36rem; animation: rise 900ms cubic-bezier(.22,1,.36,1) 3400ms both; }
 .hello { margin: 0 0 .6rem; color: var(--blue); font-size: 1rem; font-weight: 500; }
 .hero h1 {
   margin: 0 0 .9rem; font-family: var(--font-display), sans-serif; font-weight: 700;
@@ -131,10 +125,10 @@ button, input, textarea { font: inherit; }
 }
 .hero p.lead { margin: 0 0 2rem; max-width: 30rem; font-size: .95rem; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; }
-.hero-note { position: absolute; top: 18%; right: 3.5%; z-index: 4; animation: fade 900ms 3300ms both; }
+.hero-note { position: absolute; top: 18%; right: 3.5%; z-index: 4; animation: fade 900ms 3900ms both; }
 .scroll-cue {
   position: absolute; left: 1.6rem; bottom: 18%; z-index: 4; display: flex; flex-direction: column;
-  align-items: center; gap: .9rem; color: var(--muted); animation: fade 900ms 3400ms both;
+  align-items: center; gap: .9rem; color: var(--muted); animation: fade 900ms 4100ms both;
 }
 .scroll-cue span {
   font-size: .62rem; letter-spacing: .3em; text-transform: uppercase;
@@ -143,7 +137,7 @@ button, input, textarea { font: inherit; }
 .scroll-cue i { width: 1px; height: 3.4rem; background: linear-gradient(var(--blue), transparent); }
 .hero-chips {
   position: absolute; right: 0; bottom: 14%; z-index: 4; display: flex; flex-direction: column;
-  gap: .4rem; animation: slide-left 900ms 3200ms both;
+  gap: .4rem; animation: slide-left 900ms 3700ms both;
 }
 .hero-chips b {
   padding: .5rem 1.6rem .5rem 1.1rem; border-radius: .4rem 0 0 .4rem;
@@ -277,7 +271,8 @@ button, input, textarea { font: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .hero-intro { animation: none; opacity: 0; }
+  .hero-video { display: none; }
+  .hero-bg { background: url('/hero/hero-still.webp') center/cover; }
   .hero-copy, .hero-note, .scroll-cue, .hero-chips { animation: none; opacity: 1; transform: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }

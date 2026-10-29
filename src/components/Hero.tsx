@@ -5,10 +5,24 @@ const CHIPS = ['React', 'Node.js', 'PostgreSQL', 'AWS'];
 export default function Hero() {
   return (
     <section className="hero" id="home">
-      {/* Resting frame */}
+      {/* Final frame of the shot. Carries reduced-motion and any case where the video can't play. */}
       <div className="hero-bg" />
-      {/* Intro frame: holds on the glowing monogram, then scales and dissolves away */}
-      <div className="hero-intro" aria-hidden="true" />
+
+      {/* The shot itself: pulls back from the monogram to the whole room, then holds. */}
+      <video
+        className="hero-video"
+        autoPlay
+        muted
+        playsInline
+        preload="auto"
+        poster="/hero/hero-poster.webp"
+        aria-hidden="true"
+      >
+        <source media="(max-width: 860px)" src="/hero/hero-720.mp4" type="video/mp4" />
+        <source src="/hero/hero-1080.mp4" type="video/mp4" />
+      </video>
+
+      <div className="hero-scrim" aria-hidden="true" />
 
       <div className="hero-in shell">
         <div className="hero-copy">

@@ -17,7 +17,12 @@ const CHIPS = ['React', 'Node.js', 'PostgreSQL', 'AWS'];
 // sits permanently edge-on once you are deep in the page, which is no good for
 // something that now watermarks every section. This way it tumbles while the
 // page moves and falls back to square when it stops.
-const SPIN_PER_SPEED = 0.055;
+const SPIN_PER_SPEED = 0.022;
+// Hard ceiling on the turn, in radians. Past a quarter turn the mark presents
+// its dark side walls to camera, which sweeps across as a shadow — the thing
+// that read as too much. Saturated rather than clipped, so a hard flick eases
+// into the limit instead of hitting a wall.
+const SPIN_MAX = 0.62;
 
 const SCRUB_END = 0.60;
 const LOGO_START = 0.56;
@@ -166,7 +171,8 @@ export default function Hero() {
       const dy = Math.max(-140, Math.min(140, y - lastY));
       speed = speed * 0.85 + dy * 0.15;
       lastY = y;
-      spin += (speed * SPIN_PER_SPEED - spin) * 0.15;
+      const want = SPIN_MAX * Math.tanh((speed * SPIN_PER_SPEED) / SPIN_MAX);
+      spin += (want - spin) * 0.15;
       logo?.render(Math.max(0, logoP), performance.now() / 1000, spin);
 
       // Once the mark is up it is fixed to the viewport and outlives the hero,

@@ -297,7 +297,9 @@ void main(){
 
       // Side walls read darker than the face, with a lit edge where they meet.
       float side = 1.0 - abs(n.z);
-      body = mix(body, body * 0.34 + vec3(0.02, 0.07, 0.22), side * 0.6);
+      // Kept well short of black: these walls come into view whenever the mark
+      // turns, and a hard falloff there reads as a shadow crossing it.
+      body = mix(body, body * 0.58 + vec3(0.05, 0.14, 0.36), side * 0.42);
       body += vec3(0.30, 0.70, 1.0) * pow(side, 4.0) * 0.9;
 
       col += body * alive;

@@ -133,14 +133,15 @@ button, input, textarea { font: inherit; }
   background: var(--bg); opacity: calc((var(--p, 0) - .50) * 0.8);
 }
 
-/* The monogram. Shares z-index 3 with the scrim and follows it in the DOM, so it
-   paints over the dimmed plate while the copy at z-index 4 still sits above it.
-   Hidden until Hero.tsx confirms WebGL2 actually built the thing. */
+/* The monogram. Fixed to the viewport rather than parked in the hero, so once it
+   has dropped to centre it stays there for the rest of the page however far you
+   scroll. Sits under the nav's z-index 60 so the menu stays usable, and never
+   takes pointer events. Hidden until Hero.tsx confirms WebGL2 built the thing. */
 .hero-logo {
-  position: absolute; inset: 0; z-index: 3; display: none;
+  position: fixed; inset: 0; z-index: 55; display: none;
   width: 100%; height: 100%; pointer-events: none;
 }
-.hero-stage[data-logo] .hero-logo { display: block; }
+.hero-logo[data-on] { display: block; }
 
 /* Parallax: each layer leaves at its own rate while the frames advance underneath. */
 .hero[data-scrub] .hero-in {

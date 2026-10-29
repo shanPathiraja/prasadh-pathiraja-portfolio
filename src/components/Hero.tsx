@@ -49,6 +49,7 @@ export default function Hero() {
     let eased = 0;
     let visible = true;
     let faded = false;
+    let logoLive = false;
     let dead = false;
 
     // --- the two ways to land on a frame --------------------------------------
@@ -107,7 +108,7 @@ export default function Hero() {
           if (dead) made?.dispose();
           else if (made) {
             logo = made;
-            stage.dataset.logo = 'on';
+            logoCanvas.dataset.on = '1';
           }
         })
         .catch(() => {
@@ -144,7 +145,11 @@ export default function Hero() {
       if (!logoAsked && eased > LOGO_START - 0.22) wantLogo();
       logo?.render(Math.max(0, logoP), performance.now() / 1000);
 
-      raf = visible ? requestAnimationFrame(tick) : 0;
+      // Once the mark is up it is fixed to the viewport and outlives the hero,
+      // so the loop has to keep running after the section stops intersecting —
+      // otherwise the orbits freeze on whatever frame the handover caught.
+      logoLive = !!logo && logoP > 0;
+      raf = visible || logoLive ? requestAnimationFrame(tick) : 0;
     };
 
     // --- pick a renderer ------------------------------------------------------
@@ -190,7 +195,7 @@ export default function Hero() {
     const io = new IntersectionObserver(
       ([entry]) => {
         visible = entry.isIntersecting;
-        if (visible && !raf) raf = requestAnimationFrame(tick);
+        if ((visible || logoLive) && !raf) raf = requestAnimationFrame(tick);
       },
       { rootMargin: '10% 0px' },
     );
@@ -211,12 +216,18 @@ export default function Hero() {
       logo?.dispose();
       delete section.dataset.scrub;
       delete stage.dataset.frames;
-      delete stage.dataset.logo;
+      delete logoCanvas.dataset.on;
     };
   }, []);
 
   return (
-    <section className="hero" id="home" ref={sectionRef}>
+    <>
+      {/* Deliberately outside the section: the mark is fixed to the viewport and
+          has to outlive the hero, and the stage is both sticky and
+          overflow-hidden, which is exactly what clips a fixed descendant. */}
+      <canvas className="hero-logo" ref={logoRef} aria-hidden="true" />
+
+      <section className="hero" id="home" ref={sectionRef}>
       <div className="hero-stage" ref={stageRef}>
         {/* Resting frame. Carries reduced motion and anything that can't play video. */}
         <div className="hero-bg" />
@@ -245,10 +256,6 @@ export default function Hero() {
         />
 
         <div className="hero-scrim" aria-hidden="true" />
-
-        {/* Sits above the scrim so it glows over the dimmed plate, but below the
-            copy, which has cleared out by the time it arrives. */}
-        <canvas className="hero-logo" ref={logoRef} aria-hidden="true" />
 
         <div className="hero-in shell">
           <div className="hero-copy">
@@ -303,6 +310,7 @@ export default function Hero() {
           </div>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

@@ -65,6 +65,10 @@ export default function Hero() {
     let spin = 0;
     let speed = 0;
     let lastY = window.scrollY;
+    let mx = 0;
+    let my = 0;
+    let mxTarget = 0;
+    let myTarget = 0;
     let dead = false;
 
     // --- the two ways to land on a frame --------------------------------------
@@ -173,7 +177,12 @@ export default function Hero() {
       lastY = y;
       const want = SPIN_MAX * Math.tanh((speed * SPIN_PER_SPEED) / SPIN_MAX);
       spin += (want - spin) * 0.15;
-      logo?.render(Math.max(0, logoP), performance.now() / 1000, spin);
+
+      // Eased well below the pointer's own rate, so the mark trails the cursor
+      // rather than snapping to it.
+      mx += (mxTarget - mx) * 0.08;
+      my += (myTarget - my) * 0.08;
+      logo?.render(Math.max(0, logoP), performance.now() / 1000, spin, mx, my);
 
       // Once the mark is up it is fixed to the viewport and outlives the hero,
       // so the loop has to keep running after the section stops intersecting —
@@ -237,8 +246,15 @@ export default function Hero() {
     measure();
     eased = target;
     raf = requestAnimationFrame(tick);
+    // Listened for on the window, not the canvas: the canvas is behind the page
+    // content and takes no pointer events, so it never sees the cursor itself.
+    const onPointer = (e: PointerEvent) => {
+      mxTarget = (e.clientX / window.innerWidth) * 2 - 1;
+      myTarget = (e.clientY / window.innerHeight) * 2 - 1;
+    };
     window.addEventListener('scroll', measure, { passive: true });
     window.addEventListener('resize', measure);
+    window.addEventListener('pointermove', onPointer, { passive: true });
 
     return () => {
       dead = true;
@@ -246,6 +262,7 @@ export default function Hero() {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
+      window.removeEventListener('pointermove', onPointer);
       logo?.dispose();
       delete section.dataset.scrub;
       delete stage.dataset.frames;

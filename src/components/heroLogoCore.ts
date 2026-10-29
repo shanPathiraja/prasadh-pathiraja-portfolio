@@ -128,6 +128,7 @@ uniform vec2  uRes;
 uniform float uTime;
 uniform float uProg;     // 0 at handover, 1 fully resolved
 uniform float uSpin;     // radians, from scroll speed
+uniform vec2  uMouse;    // -1..1 across the viewport, 0 when the cursor is idle
 uniform sampler2D uSdf;
 
 const float SPREAD = float(${SDF_SPREAD}) / float(${SDF_SIZE});
@@ -234,6 +235,11 @@ void main(){
   // Kept off-axis at rest, so the extrusion stays legible instead of going flat.
   float yaw   = mix(-1.05, 0.22, settle) + sin(uTime * 0.28) * 0.12;
   float pitch = mix( 0.45, -0.10, settle) + sin(uTime * 0.21) * 0.06;
+
+  // The mark leans toward the cursor. Scaled by settle so it does not fight the
+  // entrance, and kept small: this is a lean, not a second spin.
+  yaw   += uMouse.x * 0.34 * settle;
+  pitch += -uMouse.y * 0.24 * settle;
   mat3 R  = rotY(yaw) * rotX(pitch);
   mat3 Rt = transpose(R);
 
@@ -291,7 +297,9 @@ void main(){
       vec3 body = base * (0.45 + 0.75 * env);
       body += vec3(0.40, 0.76, 1.0) * fres * 1.9;
 
-      vec3 key = normalize(vec3(-0.45, 0.62, -0.72));
+      // The key travels with the cursor too, so the glass throws a highlight
+      // that tracks the pointer — the part that actually reads as responsive.
+      vec3 key = normalize(vec3(-0.45 + uMouse.x * 0.75, 0.62 + uMouse.y * 0.55, -0.72));
       body += vec3(1.0) * pow(clamp(dot(refl, key), 0.0, 1.0), 56.0) * 2.6;
       body += vec3(0.55, 0.82, 1.0) * pow(clamp(dot(n, key), 0.0, 1.0), 2.0) * 0.22;
 

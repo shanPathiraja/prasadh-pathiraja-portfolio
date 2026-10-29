@@ -18,7 +18,7 @@ type Quality = {
 };
 
 export type HeroLogo = {
-  render: (progress: number, seconds: number, spin: number) => void;
+  render: (progress: number, seconds: number, spin: number, mx: number, my: number) => void;
   resize: () => void;
   dispose: () => void;
 };
@@ -97,6 +97,7 @@ export async function createHeroLogo(
   const uProg = gl.getUniformLocation(prog, 'uProg');
   const uSdf = gl.getUniformLocation(prog, 'uSdf');
   const uSpin = gl.getUniformLocation(prog, 'uSpin');
+  const uMouse = gl.getUniformLocation(prog, 'uMouse');
 
   gl.useProgram(prog);
   gl.uniform1i(uSdf, 0);
@@ -119,7 +120,7 @@ export async function createHeroLogo(
   resize();
 
   let cleared = false;
-  const render = (progress: number, seconds: number, spin: number) => {
+  const render = (progress: number, seconds: number, spin: number, mx: number, my: number) => {
     if (progress <= 0) {
       // Nothing to show yet; clear once and stay off the GPU during the scrub.
       if (!cleared) {
@@ -139,6 +140,7 @@ export async function createHeroLogo(
     gl.uniform1f(uTime, seconds);
     gl.uniform1f(uProg, Math.min(1, progress));
     gl.uniform1f(uSpin, spin);
+    gl.uniform2f(uMouse, mx, my);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

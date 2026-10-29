@@ -243,6 +243,12 @@ canvas.about-visual, canvas.tech-visual {
 .tech-visual { position: relative; border-radius: 1rem; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 1/1; }
 .tech-visual img { width: 100%; height: 100%; object-fit: cover; }
 .tech-cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem 1.4rem; }
+
+/* The 3D objects are temporarily out of both sections, so neither grid has a
+   second cell to fill. One column while that holds, with the About copy capped
+   so its facts do not stretch the full shell. Delete this block to restore. */
+.about-grid, .tech-grid { grid-template-columns: 1fr; }
+.about-grid > * { max-width: 46rem; }
 .tech-cat h3 { display: flex; align-items: center; gap: .65rem; margin: 0 0 .5rem; font-size: .95rem; font-weight: 600; }
 .tech-cat h3 i {
   display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: .55rem;

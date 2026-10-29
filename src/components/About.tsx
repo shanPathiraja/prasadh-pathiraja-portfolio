@@ -1,5 +1,4 @@
 import { Pin, Briefcase, Mail, Clock } from './Icons';
-import SectionObject from './SectionObject';
 import { SOCIALS } from '@/lib/socials';
 
 const FACTS = [
@@ -38,7 +37,10 @@ export default function About() {
           </div>
         </div>
 
-        <SectionObject shape="gyroid" className="about-visual reveal" />
+        {/* 3D object pulled for now. To bring it back, restore this line and the
+            matching one in Skills, and drop the single-column override in the
+            stylesheet:
+            <SectionObject shape="gyroid" className="about-visual reveal" /> */}
       </div>
     </section>
   );

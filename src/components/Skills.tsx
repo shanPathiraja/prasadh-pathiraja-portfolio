@@ -1,5 +1,4 @@
 import { Code, Server, Phone, Cloud, Database, Beaker } from './Icons';
-import SectionObject from './SectionObject';
 
 const CATS = [
   { icon: <Code />, title: 'Frontend', items: 'React, Next.js, TypeScript, Redux Toolkit, Tailwind CSS' },
@@ -14,7 +13,8 @@ export default function Skills() {
   return (
     <section className="section" id="skills">
       <div className="shell tech-grid">
-        <SectionObject shape="lattice" className="tech-visual reveal" />
+        {/* 3D object pulled for now — see the note in About.
+            <SectionObject shape="lattice" className="tech-visual reveal" /> */}
 
         <div className="reveal">
           <p className="eyebrow">Tech Stack</p>

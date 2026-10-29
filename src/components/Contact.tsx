@@ -1,5 +1,5 @@
 import { ArrowRight, Github, Linkedin, Mail } from './Icons';
-import { SOCIALS } from './Nav';
+import { SOCIALS } from '@/lib/socials';
 
 export default function Contact() {
   return (

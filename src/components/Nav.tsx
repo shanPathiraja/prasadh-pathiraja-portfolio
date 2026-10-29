@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Download } from './Icons';
+import { SOCIALS } from '@/lib/socials';
 
 export const NAV = [
   { id: 'home', label: 'Home' },
@@ -12,11 +13,6 @@ export const NAV = [
   { id: 'contact', label: 'Contact' },
 ];
 
-export const SOCIALS = {
-  github: 'https://github.com/shanPathiraja',
-  linkedin: 'https://www.linkedin.com/in/prasadh-pathiraja-a64b7aba/',
-  email: 'prasadh.pathiraja@gmail.com',
-};
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);

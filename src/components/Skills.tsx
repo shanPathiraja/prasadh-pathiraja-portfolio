@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import { Code, Server, Phone, Cloud, Database, Beaker } from './Icons';
+import SectionObject from './SectionObject';
 
 const CATS = [
   { icon: <Code />, title: 'Frontend', items: 'React, Next.js, TypeScript, Redux Toolkit, Tailwind CSS' },
@@ -14,15 +14,7 @@ export default function Skills() {
   return (
     <section className="section" id="skills">
       <div className="shell tech-grid">
-        <div className="tech-visual reveal">
-          <Image
-            src="/hero/intro-logo.webp"
-            alt="Holographic monogram on a developer's desk"
-            width={1672}
-            height={941}
-            sizes="(max-width: 980px) 100vw, 460px"
-          />
-        </div>
+        <SectionObject shape="lattice" className="tech-visual reveal" />
 
         <div className="reveal">
           <p className="eyebrow">Tech Stack</p>

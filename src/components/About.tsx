@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import { Pin, Briefcase, Mail, Clock } from './Icons';
-import { SOCIALS } from './Nav';
+import SectionObject from './SectionObject';
+import { SOCIALS } from '@/lib/socials';
 
 const FACTS = [
   { icon: <Pin />, label: 'Location', value: 'Colombo, Sri Lanka' },
@@ -38,15 +38,7 @@ export default function About() {
           </div>
         </div>
 
-        <div className="about-visual reveal">
-          <Image
-            src="/hero/desk.webp"
-            alt="Workspace overlooking the city at dusk"
-            width={1672}
-            height={941}
-            sizes="(max-width: 980px) 100vw, 560px"
-          />
-        </div>
+        <SectionObject shape="gyroid" className="about-visual reveal" />
       </div>
     </section>
   );

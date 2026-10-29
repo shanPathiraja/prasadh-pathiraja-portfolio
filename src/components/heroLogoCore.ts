@@ -125,7 +125,7 @@ uniform float uProg;     // 0 at handover, 1 fully resolved
 uniform sampler2D uSdf;
 
 const float SPREAD = float(${SDF_SPREAD}) / float(${SDF_SIZE});
-const float GSCALE = 2.55;    // object scale, so the mark reads at hero size
+const float GSCALE = 1.95;    // object scale, so the mark reads at hero size
 // Half depth, in unit space. The cap height of the pair is only ~0.33 here, so
 // anything near 0.08 reads as a slab rather than lettering.
 const float THICK  = 0.040;
@@ -204,8 +204,15 @@ void main(){
   float ease = uProg * uProg * (3.0 - 2.0 * uProg);
   float alive = smoothstep(0.0, 0.3, uProg);
 
-  // Settles from slightly small and over-turned into its resting pose.
-  vec2 uv = frag * mix(1.25, 1.0, ease);
+  // Act two enters high and travels down to centre, arriving before the act
+  // ends so it holds still at rest rather than drifting to the last pixel.
+  float settle = smoothstep(0.0, 0.78, uProg);
+  settle = settle * settle * (3.0 - 2.0 * settle);
+  float yShift = mix(0.30, 0.0, settle);
+
+  // Subtracting the shift from frag moves the mark up the screen: the ray that
+  // lands on the object's centre is the one at frag.y == yShift.
+  vec2 uv = (frag - vec2(0.0, yShift)) * mix(1.25, 1.0, ease);
 
   vec3 ro = vec3(0.0, 0.0, -3.1);
   vec3 rd = normalize(vec3(uv * 1.55, 1.0));
@@ -317,7 +324,7 @@ void main(){
     dust += smoothstep(0.075, 0.0, length(f - o)) * tw / (1.0 + fi);
   }
   // Kept close to the mark; spread across the whole frame it just reads as snow.
-  col += vec3(0.55, 0.80, 1.0) * dust * 0.3 * alive * exp(-length(frag) * 1.7);
+  col += vec3(0.55, 0.80, 1.0) * dust * 0.3 * alive * exp(-length(uv) * 1.7);
 
   // The drawing buffer is premultiplied, so any channel brighter than alpha gets
   // clamped away by the compositor. Carrying the glow in alpha keeps it: over a

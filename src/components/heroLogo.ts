@@ -83,9 +83,8 @@ export async function createHeroLogo(
   const tex = gl.createTexture()!;
   gl.bindTexture(gl.TEXTURE_2D, tex);
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  // Two channels, one per letter, so each can be spun about its own centre.
   gl.texImage2D(
-    gl.TEXTURE_2D, 0, gl.RG8, SDF_TEX_SIZE, SDF_TEX_SIZE, 0, gl.RG, gl.UNSIGNED_BYTE, sdf.data,
+    gl.TEXTURE_2D, 0, gl.R8, SDF_TEX_SIZE, SDF_TEX_SIZE, 0, gl.RED, gl.UNSIGNED_BYTE, sdf,
   );
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -98,11 +97,9 @@ export async function createHeroLogo(
   const uProg = gl.getUniformLocation(prog, 'uProg');
   const uSdf = gl.getUniformLocation(prog, 'uSdf');
   const uSpin = gl.getUniformLocation(prog, 'uSpin');
-  const uOff = gl.getUniformLocation(prog, 'uOff');
 
   gl.useProgram(prog);
   gl.uniform1i(uSdf, 0);
-  gl.uniform2f(uOff, sdf.offB, sdf.offP);
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 

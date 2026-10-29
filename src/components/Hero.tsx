@@ -12,11 +12,11 @@ const CHIPS = ['React', 'Node.js', 'PostgreSQL', 'AWS'];
 // Act two is deliberately longer than its animation: the mark arrives at centre
 // halfway through and the remainder is a still hold, which is the only way it
 // stays put under the scroll, since the stage unpins the moment travel runs out.
-// Radians of letter spin per pixel-per-frame of scroll speed. Driven by speed
-// rather than by distance scrolled: tie it to absolute position and the letters
-// sit permanently edge-on once you are deep in the page, which is no good for a
-// mark that now watermarks every section. This way they tumble while the page
-// moves and fall back to square when it stops.
+// Radians the mark turns per pixel-per-frame of scroll speed. Driven by speed
+// rather than by distance scrolled: tie it to absolute position and the mark
+// sits permanently edge-on once you are deep in the page, which is no good for
+// something that now watermarks every section. This way it tumbles while the
+// page moves and falls back to square when it stops.
 const SPIN_PER_SPEED = 0.055;
 
 const SCRUB_END = 0.60;
@@ -160,7 +160,11 @@ export default function Hero() {
       // Scroll speed, smoothed over a few frames so a trackpad's jitter does not
       // read as a shove, then eased into the angle the letters are driven to.
       const y = window.scrollY;
-      speed = speed * 0.85 + (y - lastY) * 0.15;
+      // Clamp the per-frame delta: a jump — an anchor link, a scrollbar drag,
+      // scroll restoration — lands thousands of pixels in one frame, which the
+      // filter would otherwise read as a colossal flick and fling the mark.
+      const dy = Math.max(-140, Math.min(140, y - lastY));
+      speed = speed * 0.85 + dy * 0.15;
       lastY = y;
       spin += (speed * SPIN_PER_SPEED - spin) * 0.15;
       logo?.render(Math.max(0, logoP), performance.now() / 1000, spin);

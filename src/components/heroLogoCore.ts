@@ -50,47 +50,17 @@ function edt2d(grid: Float64Array, w: number, h: number) {
 }
 
 /**
- * Bakes each letter into its own channel of one texture — B in red, P in green —
- * each drawn centred in the field, with its offset returned separately.
+ * Paints "BP" as one mark — the letters just kissing, not merged — and bakes a
+ * single signed field from the coverage.
  *
- * They cannot share a field any more: the letters rotate independently, and a
- * single baked field can only be transformed as a whole. Centring each one means
- * the shader rotates it about its own middle rather than about the pair's.
+ * One field, because the pair turns as a rigid set: a shape that only ever moves
+ * as a whole wants one field, and it costs a single lookup per march step rather
+ * than one per letter.
  *
- * The size is still solved from the measured pair, so the mark reads at the same
- * scale as before whatever face the browser hands us.
+ * The size is solved from the measured pair so the mark always lands inside the
+ * spread margin whatever face the browser hands us.
  */
-export type GlyphBake = {
-  data: Uint8Array; // RG8: red is B, green is P
-  offB: number; // letter centres, in object units along x
-  offP: number;
-};
-
-function fieldFor(
-  ctx: CanvasRenderingContext2D,
-  draw: () => void,
-): Float64Array {
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, SDF_SIZE, SDF_SIZE);
-  ctx.fillStyle = '#fff';
-  draw();
-  const img = ctx.getImageData(0, 0, SDF_SIZE, SDF_SIZE).data;
-  const n = SDF_SIZE * SDF_SIZE;
-  const inside = new Float64Array(n);
-  const outside = new Float64Array(n);
-  for (let i = 0; i < n; i++) {
-    const on = img[i * 4] > 127;
-    inside[i] = on ? 1e20 : 0;
-    outside[i] = on ? 0 : 1e20;
-  }
-  edt2d(inside, SDF_SIZE, SDF_SIZE);
-  edt2d(outside, SDF_SIZE, SDF_SIZE);
-  const sd = new Float64Array(n);
-  for (let i = 0; i < n; i++) sd[i] = Math.sqrt(outside[i]) - Math.sqrt(inside[i]);
-  return sd;
-}
-
-export function bakeGlyphSdf(fontFamily: string): GlyphBake {
+export function bakeGlyphSdf(fontFamily: string): Uint8Array {
   const c = document.createElement('canvas');
   c.width = SDF_SIZE;
   c.height = SDF_SIZE;
@@ -112,28 +82,31 @@ export function bakeGlyphSdf(fontFamily: string): GlyphBake {
   const left = SDF_SIZE / 2 - total / 2;
   const mid = SDF_SIZE / 2;
 
-  // Where each letter sits in the assembled mark, as an offset from centre.
-  const centreB = left + wB / 2;
-  const centreP = left + wB - overlap + wP / 2;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, SDF_SIZE, SDF_SIZE);
+  ctx.fillStyle = '#fff';
+  ctx.fillText('B', left + wB / 2, mid);
+  ctx.fillText('P', left + wB - overlap + wP / 2, mid);
 
-  // Each is baked centred, so its rotation pivots on itself.
-  const sdB = fieldFor(ctx, () => ctx.fillText('B', mid, mid));
-  const sdP = fieldFor(ctx, () => ctx.fillText('P', mid, mid));
-
+  const img = ctx.getImageData(0, 0, SDF_SIZE, SDF_SIZE).data;
   const n = SDF_SIZE * SDF_SIZE;
-  const data = new Uint8Array(n * 2);
-  const enc = (sd: number) =>
-    Math.max(0, Math.min(255, Math.round((0.5 + sd / (2 * SDF_SPREAD)) * 255)));
+  const inside = new Float64Array(n);
+  const outside = new Float64Array(n);
   for (let i = 0; i < n; i++) {
-    data[i * 2] = enc(sdB[i]);
-    data[i * 2 + 1] = enc(sdP[i]);
+    const on = img[i * 4] > 127;
+    inside[i] = on ? 1e20 : 0;
+    outside[i] = on ? 0 : 1e20;
   }
+  edt2d(inside, SDF_SIZE, SDF_SIZE);
+  edt2d(outside, SDF_SIZE, SDF_SIZE);
 
-  return {
-    data,
-    offB: (centreB - SDF_SIZE / 2) / SDF_SIZE,
-    offP: (centreP - SDF_SIZE / 2) / SDF_SIZE,
-  };
+  const out = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    // Positive outside the mark, negative within it.
+    const sd = Math.sqrt(outside[i]) - Math.sqrt(inside[i]);
+    out[i] = Math.max(0, Math.min(255, Math.round((0.5 + sd / (2 * SDF_SPREAD)) * 255)));
+  }
+  return out;
 }
 
 export const SDF_TEX_SIZE = SDF_SIZE;
@@ -154,8 +127,7 @@ out vec4 fragColor;
 uniform vec2  uRes;
 uniform float uTime;
 uniform float uProg;     // 0 at handover, 1 fully resolved
-uniform float uSpin;     // radians, accumulated from scroll distance
-uniform vec2  uOff;      // x: B's centre, y: P's centre, in object units
+uniform float uSpin;     // radians, from scroll speed
 uniform sampler2D uSdf;
 
 const float SPREAD = float(${SDF_SPREAD}) / float(${SDF_SIZE});
@@ -169,39 +141,33 @@ const float ROUND  = 0.006;
 
 mat3 rotX(float a){ float s=sin(a),c=cos(a); return mat3(1.,0.,0., 0.,c,-s, 0.,s,c); }
 mat3 rotY(float a){ float s=sin(a),c=cos(a); return mat3(c,0.,s, 0.,1.,0., -s,0.,c); }
-mat3 rotZ(float a){ float s=sin(a),c=cos(a); return mat3(c,-s,0., s,c,0., 0.,0.,1.); }
 
-// Each letter's own tumble, set once per pixel in main().
-mat3 gSpinB, gSpinP;
+// The mark's tumble, set once per pixel in main(). One matrix, because the two
+// letters turn as a rigid set about the pair's centre rather than each on its own.
+mat3 gSpin;
 
 float hash1(vec2 p){ return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
 vec2  hash2(vec2 p){ return fract(sin(vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)))) * 43758.5453); }
 
-// Signed distance to one letter, on its own plane, in unit space. isP picks the
-// channel: red holds B, green holds P, each baked centred in the field.
-float letterSD(vec2 p, float isP){
+// Signed distance to the mark on its own plane, in unit space.
+float glyphSD(vec2 p){
   // Canvas rows go down, GL texture rows go up. A flipped B still reads as a B,
   // which is what made this hide: only the P gave it away, as a b.
   vec2 uv = vec2(p.x + 0.5, 0.5 - p.y);
   vec2 g = abs(uv - 0.5) - 0.5;
   float outside = length(max(g, 0.0));
   if (outside > 0.0) return outside + SPREAD;        // beyond the baked field
-  vec2 both = texture(uSdf, uv).rg;
-  return (mix(both.r, both.g, isP) - 0.5) * 2.0 * SPREAD;
-}
-
-// One letter as a solid, spun about its own centre and put back in place.
-float letterSolid(vec3 p, float off, mat3 spin, float isP){
-  vec3 q = spin * (p - vec3(off, 0.0, 0.0));
-  // Inset by ROUND before rounding by ROUND, so the bevel sits inside the real
-  // silhouette instead of growing it and sealing the counters shut.
-  vec2 w = vec2(letterSD(q.xy, isP) + ROUND, abs(q.z) - (THICK - ROUND));
-  return min(max(w.x, w.y), 0.0) + length(max(w, 0.0)) - ROUND;
+  return (texture(uSdf, uv).r - 0.5) * 2.0 * SPREAD;
 }
 
 float mapUnit(vec3 p){
-  return min(letterSolid(p, uOff.x, gSpinB, 0.0),
-             letterSolid(p, uOff.y, gSpinP, 1.0));
+  // Turn the whole mark first, so both letters swing together about the pair's
+  // centre instead of each pivoting on itself.
+  vec3 q = gSpin * p;
+  // Inset by ROUND before rounding by ROUND, so the bevel sits inside the real
+  // silhouette instead of growing it and sealing the counters shut.
+  vec2 w = vec2(glyphSD(q.xy) + ROUND, abs(q.z) - (THICK - ROUND));
+  return min(max(w.x, w.y), 0.0) + length(max(w, 0.0)) - ROUND;
 }
 
 // The same solid at hero scale. Uniform, so thickness and rounding scale too.
@@ -271,12 +237,11 @@ void main(){
   mat3 R  = rotY(yaw) * rotX(pitch);
   mat3 Rt = transpose(R);
 
-  // Scroll drives the letters independently: different axes, different rates and
-  // opposite senses, so they read as tumbling loose rather than geared together.
-  // Both ease in with the arrival, or they would be mid-spin as they appear.
+  // Scroll turns the mark as one piece, on a tilted axis so it reads as a tumble
+  // rather than a flat spin. Eased in with the arrival, or it would be mid-turn
+  // as it appears.
   float spin = uSpin * settle;
-  gSpinB = rotY(spin * 1.00) * rotX(spin * 0.37);
-  gSpinP = rotY(spin * -0.76) * rotZ(spin * 0.52);
+  gSpin = rotY(spin) * rotX(spin * 0.35);
 
   vec3 oro = Rt * ro;
   vec3 ord = Rt * rd;
@@ -358,9 +323,9 @@ void main(){
   if (abs(ord.z) > 1e-4) {
     float tp = -oro.z / ord.z;
     if (tp > 0.0) {
-      vec2 pl = (oro + ord * tp).xy / GSCALE;
-      float ds = max(min(letterSD(pl - vec2(uOff.x, 0.0), 0.0),
-                         letterSD(pl - vec2(uOff.y, 0.0), 1.0)), 0.0);
+      // Turned the same way as the solid, so the bloom tracks the mark.
+      vec3 pl = gSpin * vec3((oro + ord * tp).xy / GSCALE, 0.0);
+      float ds = max(glyphSD(pl.xy), 0.0);
       float rim = exp(-ds * 34.0) * 0.55;
       float pulse = 0.85 + 0.15 * sin(uTime * 1.6);
       col += vec3(0.26, 0.58, 1.0) * rim * alive * pulse;

@@ -106,12 +106,20 @@ button, input, textarea { font: inherit; }
 /* Flat base by default: the <video>'s own poster covers the pre-playback moment, so the
    heavier still is only fetched on the reduced-motion path that actually needs it. */
 .hero-bg { position: absolute; inset: 0; z-index: 1; background: var(--bg); }
-/* Scrubbed by scroll, so it holds whatever frame the scroll position maps to. */
-.hero-video {
+/* Scrubbed by scroll, so it holds whatever frame the scroll position maps to.
+   Desktop stays on the video: at 1080p it is both smaller and sharper than the
+   equivalent still sequence, and seeking is dependable there. */
+.hero-video,
+.hero-frames {
   position: absolute; inset: 0; z-index: 2;
   width: 100%; height: 100%; object-fit: cover;
   animation: fade 600ms ease-out both;
 }
+/* Small screens paint decoded stills instead; Hero.tsx sets data-frames once the
+   set is in memory, and only then does the canvas take over from the poster. */
+.hero-frames { display: none; }
+.hero-stage[data-frames] .hero-frames { display: block; }
+.hero-stage[data-frames] .hero-video { display: none; }
 /* One scrim over both layers, so the copy reads the same whether the video plays or not.
    It deepens as the shot runs out, easing the handover to the next section. */
 .hero-scrim {
@@ -312,7 +320,7 @@ button, input, textarea { font: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .hero-video { display: none; }
+  .hero-video, .hero-frames { display: none; }
   .hero-bg { background: url('/hero/hero-still.webp') center/cover; }
   .hero-copy, .hero-note p, .scroll-cue-in, .hero-chips-in { animation: none; opacity: 1; transform: none; }
   .reveal { opacity: 1; transform: none; transition: none; }

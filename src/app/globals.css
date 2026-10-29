@@ -96,7 +96,7 @@ button, input, textarea { font: inherit; }
 /* ---------- hero ---------- */
 /* Scroll-scrubbed hero. Without JS (or with reduced motion) this stays a normal 100vh
    band that autoplays; .hero[data-scrub] is set by Hero.tsx once it can drive the frames. */
-.hero { position: relative; }
+.hero { position: relative; z-index: 0; }
 .hero-stage {
   position: relative; height: 100svh; display: flex; align-items: center; overflow: hidden;
 }
@@ -135,12 +135,17 @@ button, input, textarea { font: inherit; }
 
 /* The monogram. Fixed to the viewport rather than parked in the hero, so once it
    has dropped to centre it stays there for the rest of the page however far you
-   scroll. Sits under the nav's z-index 60 so the menu stays usable, and never
-   takes pointer events. Hidden until Hero.tsx confirms WebGL2 built the thing. */
+   scroll. It sits behind every section's content and never takes pointer
+   events. Hidden until Hero.tsx confirms WebGL2 built the thing. */
 .hero-logo {
-  position: fixed; inset: 0; z-index: 55; display: none;
+  position: fixed; inset: 0; z-index: 1; display: none;
   width: 100%; height: 100%; pointer-events: none;
 }
+/* Three layers, which is the only way this stays consistent: section panels
+   paint below the mark, the mark above them, and every section's content above
+   that. About and Projects carry opaque backgrounds, so putting the mark behind
+   those outright would have it vanish over them and reappear between. */
+.section > .shell { position: relative; z-index: 2; }
 .hero-logo[data-on] { display: block; }
 
 /* Parallax: each layer leaves at its own rate while the frames advance underneath. */
@@ -284,7 +289,7 @@ button, input, textarea { font: inherit; }
 .exp-proj small { color: var(--blue-soft); font-size: .7rem; }
 
 /* ---------- contact ---------- */
-.contact { position: relative; text-align: center; overflow: hidden; }
+.contact { position: relative; z-index: 0; text-align: center; overflow: hidden; }
 .contact-bg { position: absolute; inset: 0; background: url('/hero/desk.webp') center/cover; filter: blur(2px); transform: scale(1.05); }
 .contact-bg::after { content: ''; position: absolute; inset: 0; background: rgba(6,11,22,.85); }
 .contact .shell { position: relative; z-index: 2; }

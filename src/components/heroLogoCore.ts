@@ -201,25 +201,26 @@ void main(){
   // and on any landscape viewport this resolves to uRes.y exactly as before.
   vec2 frag = (gl_FragCoord.xy - 0.5 * uRes) / min(uRes.x * 1.3, uRes.y);
 
-  float ease = uProg * uProg * (3.0 - 2.0 * uProg);
-  float alive = smoothstep(0.0, 0.3, uProg);
+  float alive = smoothstep(0.0, 0.12, uProg);
 
-  // Act two enters high and travels down to centre, arriving before the act
-  // ends so it holds still at rest rather than drifting to the last pixel.
-  float settle = smoothstep(0.0, 0.78, uProg);
+  // One curve drives the whole arrival — position, pose, scale and orbit
+  // spread — and it completes at 0.50, leaving the back half of the act as a
+  // dead-still hold at centre. Anything still keyed to uProg itself would creep
+  // for the entire hold instead of coming to rest.
+  float settle = smoothstep(0.0, 0.50, uProg);
   settle = settle * settle * (3.0 - 2.0 * settle);
   float yShift = mix(0.30, 0.0, settle);
 
   // Subtracting the shift from frag moves the mark up the screen: the ray that
   // lands on the object's centre is the one at frag.y == yShift.
-  vec2 uv = (frag - vec2(0.0, yShift)) * mix(1.25, 1.0, ease);
+  vec2 uv = (frag - vec2(0.0, yShift)) * mix(1.25, 1.0, settle);
 
   vec3 ro = vec3(0.0, 0.0, -3.1);
   vec3 rd = normalize(vec3(uv * 1.55, 1.0));
 
   // Kept off-axis at rest, so the extrusion stays legible instead of going flat.
-  float yaw   = mix(-1.05, 0.22, ease) + sin(uTime * 0.28) * 0.12;
-  float pitch = mix( 0.45, -0.10, ease) + sin(uTime * 0.21) * 0.06;
+  float yaw   = mix(-1.05, 0.22, settle) + sin(uTime * 0.28) * 0.12;
+  float pitch = mix( 0.45, -0.10, settle) + sin(uTime * 0.21) * 0.06;
   mat3 R  = rotY(yaw) * rotX(pitch);
   mat3 Rt = transpose(R);
 
@@ -287,8 +288,8 @@ void main(){
 
   // Orbits. Three circles, each in its own tilted plane, all turning about the
   // mark and correctly hidden where they pass behind it.
-  float ringFade = smoothstep(0.08, 0.55, uProg);
-  float spread = mix(1.45, 1.0, ease) * GSCALE;
+  float ringFade = smoothstep(0.04, 0.30, uProg);
+  float spread = mix(1.45, 1.0, settle) * GSCALE;
   float s1, s2, s3;
   float g1 = ring(ro, rd, rotX( 1.33) * rotY( uTime * 0.55       ) * Rt, 0.60 * spread, tHit, 0.0, s1);
   float g2 = ring(ro, rd, rotX(-0.98) * rotY(-uTime * 0.42 + 2.10) * Rt, 0.50 * spread, tHit, 2.1, s2);

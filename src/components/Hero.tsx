@@ -9,8 +9,11 @@ const CHIPS = ['React', 'Node.js', 'PostgreSQL', 'AWS'];
 // The pinned stage runs two acts. The footage scrubs across the first, then the
 // monogram resolves out of the last frame — overlapping slightly, so the logo is
 // already forming as the shot settles rather than popping in after it.
-const SCRUB_END = 0.72;
-const LOGO_START = 0.68;
+// Act two is deliberately longer than its animation: the mark arrives at centre
+// halfway through and the remainder is a still hold, which is the only way it
+// stays put under the scroll, since the stage unpins the moment travel runs out.
+const SCRUB_END = 0.60;
+const LOGO_START = 0.56;
 
 // 48 stills over ~130vh of phone scroll is a frame every ~23px, which reads as
 // continuous. Measured against the 720p cut it replaces: 1.16MB vs 1.60MB at the
@@ -126,7 +129,7 @@ export default function Hero() {
       stage.style.setProperty('--p', eased.toFixed(4));
 
       // Once the copy has faded out it must stop catching clicks, since the stage stays pinned.
-      const nowFaded = eased > 0.6;
+      const nowFaded = eased > 0.5;
       if (nowFaded !== faded) {
         faded = nowFaded;
         if (faded) stage.dataset.faded = 'on';

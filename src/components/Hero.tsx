@@ -109,6 +109,10 @@ export default function Hero() {
           else if (made) {
             logo = made;
             logoCanvas.dataset.on = '1';
+            // The loop stops itself when the hero is off screen and no logo is up
+            // yet. Land past the hero before this import resolves and that has
+            // already happened, so the mark would never draw a single frame.
+            if (!raf) raf = requestAnimationFrame(tick);
           }
         })
         .catch(() => {
@@ -148,7 +152,10 @@ export default function Hero() {
       // Once the mark is up it is fixed to the viewport and outlives the hero,
       // so the loop has to keep running after the section stops intersecting —
       // otherwise the orbits freeze on whatever frame the handover caught.
-      logoLive = !!logo && logoP > 0;
+      // Deliberately not gated on logoP: that is derived from eased, which only
+      // this loop advances, so gating on it lets the loop stop at a value it
+      // then has no way to climb out of. render() no-ops below zero anyway.
+      logoLive = !!logo;
       raf = visible || logoLive ? requestAnimationFrame(tick) : 0;
     };
 

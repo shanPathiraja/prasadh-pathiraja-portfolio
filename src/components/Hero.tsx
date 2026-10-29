@@ -1,9 +1,16 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import type { HeroLogo } from './heroLogo';
 import { ArrowRight, Mail } from './Icons';
 
 const CHIPS = ['React', 'Node.js', 'PostgreSQL', 'AWS'];
+
+// The pinned stage runs two acts. The footage scrubs across the first, then the
+// monogram resolves out of the last frame — overlapping slightly, so the logo is
+// already forming as the shot settles rather than popping in after it.
+const SCRUB_END = 0.72;
+const LOGO_START = 0.68;
 
 // 48 stills over ~130vh of phone scroll is a frame every ~23px, which reads as
 // continuous. Measured against the 720p cut it replaces: 1.16MB vs 1.60MB at the
@@ -18,13 +25,15 @@ export default function Hero() {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const logoRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
     const stage = stageRef.current;
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!section || !stage || !video || !canvas) return;
+    const logoCanvas = logoRef.current;
+    if (!section || !stage || !video || !canvas || !logoCanvas) return;
 
     // Without JS, or with reduced motion, the markup stays a plain 100vh hero that
     // autoplays once. The tall pinned layout only switches on when we can drive it.
@@ -75,6 +84,34 @@ export default function Hero() {
 
     let render = seekVideo;
 
+    // --- the monogram ---------------------------------------------------------
+    // Pulled in only once the scrub is most of the way through, so neither the
+    // shader source nor the SDF bake competes with the frames for the main thread.
+    let logo: HeroLogo | null = null;
+    let logoAsked = false;
+    const small = window.matchMedia('(max-width: 860px)').matches;
+    const wantLogo = () => {
+      if (logoAsked) return;
+      logoAsked = true;
+      import('./heroLogo')
+        .then((m) =>
+          m.createHeroLogo(logoCanvas, {
+            steps: small ? 42 : 56,
+            maxDpr: small ? 1.25 : 1.75,
+          }),
+        )
+        .then((made) => {
+          if (dead) made?.dispose();
+          else if (made) {
+            logo = made;
+            stage.dataset.logo = 'on';
+          }
+        })
+        .catch(() => {
+          /* no WebGL2, or the shader wouldn't build: the hero just ends on the shot */
+        });
+    };
+
     // --- scroll driver, shared by both renderers ------------------------------
     const measure = () => {
       const travel = section.offsetHeight - stage.offsetHeight;
@@ -96,7 +133,14 @@ export default function Hero() {
         else delete stage.dataset.faded;
       }
 
-      render(eased);
+      // Act one: the footage, finished well before the stage unpins.
+      render(Math.min(1, eased / SCRUB_END));
+
+      // Act two: the monogram, warmed up a little ahead of its entrance.
+      const logoP = (eased - LOGO_START) / (1 - LOGO_START);
+      if (!logoAsked && eased > LOGO_START - 0.22) wantLogo();
+      logo?.render(Math.max(0, logoP), performance.now() / 1000);
+
       raf = visible ? requestAnimationFrame(tick) : 0;
     };
 
@@ -161,8 +205,10 @@ export default function Hero() {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
+      logo?.dispose();
       delete section.dataset.scrub;
       delete stage.dataset.frames;
+      delete stage.dataset.logo;
     };
   }, []);
 
@@ -196,6 +242,10 @@ export default function Hero() {
         />
 
         <div className="hero-scrim" aria-hidden="true" />
+
+        {/* Sits above the scrim so it glows over the dimmed plate, but below the
+            copy, which has cleared out by the time it arrives. */}
+        <canvas className="hero-logo" ref={logoRef} aria-hidden="true" />
 
         <div className="hero-in shell">
           <div className="hero-copy">

@@ -128,6 +128,9 @@ export default function Hero() {
           else if (made) {
             logo = made;
             logoCanvas.dataset.on = '1';
+            // Landed below the hero: there is no entrance to play, so arrive
+            // resolved rather than easing up from wherever eased had stalled.
+            if (!visible) eased = target;
             // The loop stops itself when the hero is off screen and no logo is up
             // yet. Land past the hero before this import resolves and that has
             // already happened, so the mark would never draw a single frame.
@@ -144,6 +147,12 @@ export default function Hero() {
       const travel = section.offsetHeight - stage.offsetHeight;
       const scrolled = -section.getBoundingClientRect().top;
       target = travel > 0 ? Math.min(1, Math.max(0, scrolled / travel)) : 0;
+      // Asked for off target, never off eased. eased only moves while the loop
+      // runs, and the loop stops when the hero is off screen with no mark up —
+      // so asking off eased lets it stall below the threshold that would have
+      // created the mark, with nothing able to advance it. target comes
+      // straight from scroll position and is always current.
+      if (!logoAsked && target > LOGO_START - 0.22) wantLogo();
     };
 
     const tick = () => {
@@ -165,7 +174,6 @@ export default function Hero() {
 
       // Act two: the monogram, warmed up a little ahead of its entrance.
       const logoP = (eased - LOGO_START) / (1 - LOGO_START);
-      if (!logoAsked && eased > LOGO_START - 0.22) wantLogo();
       // Scroll speed, smoothed over a few frames so a trackpad's jitter does not
       // read as a shove, then eased into the angle the letters are driven to.
       const y = window.scrollY;

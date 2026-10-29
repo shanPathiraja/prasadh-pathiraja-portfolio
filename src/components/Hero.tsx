@@ -12,6 +12,13 @@ const CHIPS = ['React', 'Node.js', 'PostgreSQL', 'AWS'];
 // Act two is deliberately longer than its animation: the mark arrives at centre
 // halfway through and the remainder is a still hold, which is the only way it
 // stays put under the scroll, since the stage unpins the moment travel runs out.
+// Radians of letter spin per pixel-per-frame of scroll speed. Driven by speed
+// rather than by distance scrolled: tie it to absolute position and the letters
+// sit permanently edge-on once you are deep in the page, which is no good for a
+// mark that now watermarks every section. This way they tumble while the page
+// moves and fall back to square when it stops.
+const SPIN_PER_SPEED = 0.055;
+
 const SCRUB_END = 0.60;
 const LOGO_START = 0.56;
 
@@ -50,6 +57,9 @@ export default function Hero() {
     let visible = true;
     let faded = false;
     let logoLive = false;
+    let spin = 0;
+    let speed = 0;
+    let lastY = window.scrollY;
     let dead = false;
 
     // --- the two ways to land on a frame --------------------------------------
@@ -147,7 +157,13 @@ export default function Hero() {
       // Act two: the monogram, warmed up a little ahead of its entrance.
       const logoP = (eased - LOGO_START) / (1 - LOGO_START);
       if (!logoAsked && eased > LOGO_START - 0.22) wantLogo();
-      logo?.render(Math.max(0, logoP), performance.now() / 1000);
+      // Scroll speed, smoothed over a few frames so a trackpad's jitter does not
+      // read as a shove, then eased into the angle the letters are driven to.
+      const y = window.scrollY;
+      speed = speed * 0.85 + (y - lastY) * 0.15;
+      lastY = y;
+      spin += (speed * SPIN_PER_SPEED - spin) * 0.15;
+      logo?.render(Math.max(0, logoP), performance.now() / 1000, spin);
 
       // Once the mark is up it is fixed to the viewport and outlives the hero,
       // so the loop has to keep running after the section stops intersecting —

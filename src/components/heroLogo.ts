@@ -18,7 +18,7 @@ type Quality = {
 };
 
 export type HeroLogo = {
-  render: (progress: number, seconds: number) => void;
+  render: (progress: number, seconds: number, spin: number) => void;
   resize: () => void;
   dispose: () => void;
 };
@@ -83,7 +83,10 @@ export async function createHeroLogo(
   const tex = gl.createTexture()!;
   gl.bindTexture(gl.TEXTURE_2D, tex);
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, SDF_TEX_SIZE, SDF_TEX_SIZE, 0, gl.RED, gl.UNSIGNED_BYTE, sdf);
+  // Two channels, one per letter, so each can be spun about its own centre.
+  gl.texImage2D(
+    gl.TEXTURE_2D, 0, gl.RG8, SDF_TEX_SIZE, SDF_TEX_SIZE, 0, gl.RG, gl.UNSIGNED_BYTE, sdf.data,
+  );
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -94,9 +97,12 @@ export async function createHeroLogo(
   const uTime = gl.getUniformLocation(prog, 'uTime');
   const uProg = gl.getUniformLocation(prog, 'uProg');
   const uSdf = gl.getUniformLocation(prog, 'uSdf');
+  const uSpin = gl.getUniformLocation(prog, 'uSpin');
+  const uOff = gl.getUniformLocation(prog, 'uOff');
 
   gl.useProgram(prog);
   gl.uniform1i(uSdf, 0);
+  gl.uniform2f(uOff, sdf.offB, sdf.offP);
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -116,7 +122,7 @@ export async function createHeroLogo(
   resize();
 
   let cleared = false;
-  const render = (progress: number, seconds: number) => {
+  const render = (progress: number, seconds: number, spin: number) => {
     if (progress <= 0) {
       // Nothing to show yet; clear once and stay off the GPU during the scrub.
       if (!cleared) {
@@ -135,6 +141,7 @@ export async function createHeroLogo(
     gl.uniform2f(uRes, w, h);
     gl.uniform1f(uTime, seconds);
     gl.uniform1f(uProg, Math.min(1, progress));
+    gl.uniform1f(uSpin, spin);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

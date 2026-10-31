@@ -43,9 +43,21 @@ export default function Motion() {
     const tracked = Array.from(document.querySelectorAll<HTMLElement>('[data-prog]'));
     let raf = 0;
 
+    const doc = document.documentElement;
+    const hero = document.querySelector('.hero');
+
     const write = () => {
       raf = 0;
       const vh = window.innerHeight;
+
+      // Page progress for the background field, measured from the foot of the
+      // hero rather than the top of the document: the hero is 480vh of the
+      // scroll on its own, and counting it would leave the content sections
+      // sharing the back half of the range.
+      const start = hero ? hero.getBoundingClientRect().bottom + window.scrollY : 0;
+      const span = doc.scrollHeight - vh - start;
+      const pp = span > 0 ? (window.scrollY - start) / span : 0;
+      doc.style.setProperty('--pp', (pp < 0 ? 0 : pp > 1 ? 1 : pp).toFixed(4));
 
       // A group that ends up above the viewport without ever having been
       // inside it — a deep link to #contact, a restored scroll position — gets

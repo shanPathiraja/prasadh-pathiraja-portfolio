@@ -11,6 +11,16 @@ import SiteFooter from '@/components/SiteFooter';
 export default function Home() {
   return (
     <>
+      {/* One field behind the whole document. Fixed, so it does not restart at
+          every section — that is the entire point of it. */}
+      <div className="bg-flow" aria-hidden="true">
+        <i className="bg-aurora" />
+        <i className="bg-aurora-2" />
+        <i className="bg-beams" />
+        <i className="bg-stars" />
+        <i className="bg-stars-far" />
+        <i className="bg-grain" />
+      </div>
       <Nav />
       <Motion />
       <main>

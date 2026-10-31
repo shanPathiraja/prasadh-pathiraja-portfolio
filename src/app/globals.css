@@ -109,7 +109,15 @@ button, input, textarea { font: inherit; }
   position: relative; height: 100svh; display: flex; align-items: center; overflow: hidden;
 }
 .hero[data-scrub] { height: 480vh; }
-.hero[data-scrub] .hero-stage { position: sticky; top: 0; }
+/* The pinned stage ends in a hard horizontal cut when it finally scrolls away,
+   which is the one real seam left on the page. Fading its last tenth dissolves
+   the footage into the field instead. It costs nothing while pinned: the scrim
+   has already taken the bottom of the shot to rgba(6,11,22,.9) there. */
+.hero[data-scrub] .hero-stage {
+  position: sticky; top: 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 90%, transparent);
+          mask-image: linear-gradient(to bottom, #000 90%, transparent);
+}
 
 /* Flat base by default: the <video>'s own poster covers the pre-playback moment, so the
    heavier still is only fetched on the reduced-motion path that actually needs it. */
@@ -230,7 +238,12 @@ button, input, textarea { font: inherit; }
 .in-view .reveal, .reveal.in-view { opacity: 1; transform: none; }
 
 /* ---------- about ---------- */
-.about { background: var(--bg-alt); }
+.about { position: relative; }
+.about::before, .projects::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(10,17,32,0), rgba(10,17,32,.66) 20%, rgba(10,17,32,.66) 80%, rgba(10,17,32,0));
+}
 .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
 .about-facts { margin-top: 2rem; display: grid; gap: 1rem; }
 .fact { display: flex; align-items: center; gap: 1rem; font-size: .9rem; }
@@ -278,7 +291,7 @@ canvas.about-visual, canvas.tech-visual {
 .tech-cat p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.7; }
 
 /* ---------- projects ---------- */
-.projects { background: var(--bg-alt); }
+.projects { position: relative; }
 .proj-head { display: flex; align-items: end; justify-content: space-between; gap: 2rem; }
 .link-more { display: inline-flex; align-items: center; gap: .5rem; color: var(--blue); font-size: .85rem; font-weight: 600; }
 .proj-grid { margin-top: 3rem; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4rem; }
@@ -342,6 +355,8 @@ canvas.about-visual, canvas.tech-visual {
 .contact-bg {
   position: absolute; inset: 0; background: url('/hero/desk.webp') center/cover; filter: blur(2px);
   transform: translate3d(0, calc((var(--sp, .5) - .5) * -3rem), 0) scale(1.2);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
 }
 .contact-bg::after { content: ''; position: absolute; inset: 0; background: rgba(6,11,22,.85); }
 .contact .shell { position: relative; z-index: 2; }
@@ -356,9 +371,113 @@ canvas.about-visual, canvas.tech-visual {
 .socials svg { width: 1.1rem; height: 1.1rem; }
 
 /* ---------- footer ---------- */
-.foot { border-top: 1px solid var(--line); }
+/* Lifted for the same reason as the section shells: the fixed field behind the
+   page is a positioned element, so it paints over anything in normal flow —
+   which the footer, alone on the page, still was. */
+.foot { position: relative; z-index: 2; border-top: 1px solid var(--line); }
 .foot-in { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.6rem 0; }
 .foot-in p { margin: 0; color: var(--muted); font-size: .78rem; }
+
+/* ---------- the field behind everything ---------- */
+/* The page used to be flat navy with two slightly lighter panels dropped on
+   it, which reads as a stack of separate pages. This is one fixed field for
+   the whole document instead, so scrolling moves through it continuously.
+   Everything below animates transform or opacity only — both composited —
+   because the monogram's raymarcher is already spending most of a frame.
+   --pp is page progress past the hero, written by Motion.tsx. */
+.bg-flow {
+  position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  background: radial-gradient(125% 85% at 50% -10%, #0c1829 0%, var(--bg) 58%);
+}
+.bg-flow > i { position: absolute; display: block; }
+.bg-flow::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(118% 88% at 50% 48%, transparent 52%, rgba(2,6,14,.6));
+}
+
+/* Two palettes that cross-fade over the descent, so the colour of the space
+   changes as you go down rather than looping in place. The drift animation
+   owns `transform`, so the scroll coupling has to use `translate`. */
+.bg-aurora, .bg-aurora-2 {
+  inset: -22% -12%;
+  animation: drift 52s ease-in-out infinite alternate;
+  translate: 0 calc(var(--pp, 0) * -7vh);
+  will-change: transform;
+}
+.bg-aurora {
+  opacity: calc(1 - var(--pp, 0) * .85);
+  background:
+    radial-gradient(38% 30% at 20% 26%, rgba(47,139,255,.20), transparent 70%),
+    radial-gradient(32% 26% at 80% 58%, rgba(90,166,255,.14), transparent 72%),
+    radial-gradient(48% 34% at 52% 96%, rgba(22,99,204,.17), transparent 70%);
+}
+.bg-aurora-2 {
+  opacity: calc(var(--pp, 0) * .85);
+  animation-duration: 67s; animation-direction: alternate-reverse;
+  background:
+    radial-gradient(40% 30% at 72% 20%, rgba(32,178,214,.13), transparent 70%),
+    radial-gradient(34% 28% at 22% 68%, rgba(96,88,235,.15), transparent 72%),
+    radial-gradient(46% 32% at 48% 100%, rgba(47,139,255,.13), transparent 70%);
+}
+@keyframes drift {
+  from { transform: translate3d(-3%, -2%, 0) scale(1.04); }
+  to   { transform: translate3d(3%, 2%, 0) scale(1.12); }
+}
+
+/* Two shallow shafts of light crossing the field. */
+.bg-beams {
+  inset: -35%;
+  background:
+    linear-gradient(97deg, transparent 43%, rgba(130,186,255,.055) 50%, transparent 57%),
+    linear-gradient(83deg, transparent 59%, rgba(47,139,255,.045) 66%, transparent 73%);
+  animation: sweep 38s ease-in-out infinite alternate;
+}
+@keyframes sweep {
+  from { transform: translate3d(-9%, 0, 0); }
+  to   { transform: translate3d(9%, 0, 0); }
+}
+
+/* Starfield in two planes at different parallax rates, which is what gives the
+   descent its depth. Tiles of different periods so the repeat does not read. */
+.bg-stars, .bg-stars-far { inset: -30% 0; background-repeat: repeat; }
+.bg-stars {
+  background-size: 520px 520px;
+  translate: 0 calc(var(--pp, 0) * -20vh);
+  background-image:
+    radial-gradient(1.4px 1.4px at 48px 72px, rgba(206,228,255,.55), transparent 100%),
+    radial-gradient(1px 1px at 196px 148px, rgba(190,218,255,.38), transparent 100%),
+    radial-gradient(1.6px 1.6px at 338px 44px, rgba(168,206,255,.46), transparent 100%),
+    radial-gradient(1px 1px at 124px 356px, rgba(206,228,255,.32), transparent 100%),
+    radial-gradient(1.3px 1.3px at 430px 268px, rgba(182,214,255,.44), transparent 100%),
+    radial-gradient(1px 1px at 272px 470px, rgba(206,228,255,.3), transparent 100%);
+}
+.bg-stars-far {
+  background-size: 337px 337px;
+  translate: 0 calc(var(--pp, 0) * -8vh);
+  animation: shimmer 11s ease-in-out infinite alternate;
+  background-image:
+    radial-gradient(1px 1px at 30px 40px, rgba(160,196,255,.3), transparent 100%),
+    radial-gradient(1px 1px at 158px 212px, rgba(160,196,255,.22), transparent 100%),
+    radial-gradient(1px 1px at 246px 96px, rgba(176,208,255,.26), transparent 100%),
+    radial-gradient(1px 1px at 92px 290px, rgba(160,196,255,.2), transparent 100%);
+}
+@keyframes shimmer { from { opacity: .55; } to { opacity: 1; } }
+
+/* Film grain. Translated rather than repositioned, so it stays off the paint
+   path; the element is oversized so the offset never exposes an edge. */
+.bg-grain {
+  inset: -60%; opacity: .045; background-size: 170px 170px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='170' height='170'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='170' height='170' filter='url(%23n)'/></svg>");
+  animation: grain 1.4s steps(5) infinite;
+}
+@keyframes grain {
+  0%   { transform: translate3d(0, 0, 0); }
+  20%  { transform: translate3d(-7px, 5px, 0); }
+  40%  { transform: translate3d(6px, -8px, 0); }
+  60%  { transform: translate3d(-5px, -6px, 0); }
+  80%  { transform: translate3d(8px, 4px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
 
 /* ---------- scroll motion ---------- */
 /* Entrances are animations rather than transitions on purpose: most of the
@@ -416,6 +535,10 @@ canvas.about-visual, canvas.tech-visual {
   /* shorter pin on a phone: 3.4 viewports of thumb-scroll before any content is too much */
   .hero[data-scrub] { height: 350vh; }
   .tech-cats, .proj-grid { grid-template-columns: 1fr; }
+  /* The monogram's raymarcher is the frame budget on a phone; grain and beams
+     are the two layers worth the least per millisecond. */
+  /* qualified, or `.bg-flow > i` out-ranks it and neither layer drops */
+  .bg-flow > .bg-grain, .bg-flow > .bg-beams { display: none; }
   /* one column: a per-card offset would just read as uneven gaps */
   .proj-grid > *:nth-child(2n) { --pary: 0rem; }
   .exp-proj strong { min-width: 100%; }
@@ -428,6 +551,7 @@ canvas.about-visual, canvas.tech-visual {
   .hero-bg { background: url('/hero/hero-still.webp') center/cover; }
   .hero-copy, .hero-note p, .scroll-cue-in, .hero-chips-in { animation: none; opacity: 1; transform: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
+  .bg-aurora, .bg-aurora-2, .bg-beams, .bg-stars-far, .bg-grain { animation: none; }
   .stagger > * { opacity: 1; animation: none; }
   .eyebrow::before, .eyebrow::after, .exp::before { animation: none; scale: 1 1; }
 }

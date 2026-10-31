@@ -1,14 +1,3 @@
-/**
- * The BP monogram that resolves out of the hero footage once the scrub ends.
- *
- * The letters are a real extruded solid, not a sprite: a signed distance field
- * is baked from the site's own display face, then sphere-traced in the fragment
- * shader. That buys genuine silhouette change as it turns, and lets the orbital
- * rings be depth-tested against the glyph so they pass behind it properly.
- *
- * Everything composites premultiplied over the video frame underneath: the solid
- * body writes alpha, the glows carry colour with no alpha so they add.
- */
 
 import { bakeGlyphSdf, FRAG, SDF_TEX_SIZE, VERT } from './heroLogoCore';
 

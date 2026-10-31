@@ -1,4 +1,5 @@
 import Nav from '@/components/Nav';
+import Motion from '@/components/Motion';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
 import Skills from '@/components/Skills';
@@ -11,6 +12,7 @@ export default function Home() {
   return (
     <>
       <Nav />
+      <Motion />
       <main>
         <Hero />
         <About />

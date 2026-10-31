@@ -34,23 +34,12 @@ export default function Nav() {
       if (el) spy.observe(el);
     });
 
-    // Section entrance animations
-    const reveal = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add('in-view');
-            reveal.unobserve(e.target);
-          }
-        }),
-      { threshold: 0.12 }
-    );
-    document.querySelectorAll('section').forEach((s) => reveal.observe(s));
+    // Entrance animations live in Motion.tsx, which observes each group
+    // on its own rather than whole sections.
 
     return () => {
       window.removeEventListener('scroll', onScroll);
       spy.disconnect();
-      reveal.disconnect();
     };
   }, []);
 

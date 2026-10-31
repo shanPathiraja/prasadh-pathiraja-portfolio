@@ -10,9 +10,9 @@ const FACTS = [
 
 export default function About() {
   return (
-    <section className="section about" id="about">
+    <section className="section about" id="about" data-prog>
       <div className="shell about-grid">
-        <div className="reveal">
+        <div className="stagger">
           <p className="eyebrow">About Me</p>
           <h2 className="h2">
             Crafting Digital
@@ -26,7 +26,7 @@ export default function About() {
             clean architecture.
           </p>
 
-          <div className="about-facts">
+          <div className="about-facts stagger" data-dir="left">
             {FACTS.map((f) => (
               <div className="fact" key={f.label}>
                 <i>{f.icon}</i>

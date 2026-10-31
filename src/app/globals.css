@@ -33,9 +33,17 @@ button, input, textarea { font: inherit; }
 .shell { width: min(100% - 3rem, var(--shell)); margin-inline: auto; }
 .section { padding: 7rem 0; }
 .eyebrow {
+  display: inline-flex; align-items: center; gap: .7rem;
   margin: 0 0 .9rem; color: var(--blue); font-size: .72rem; font-weight: 600;
   letter-spacing: .22em; text-transform: uppercase;
 }
+.eyebrow::before,
+/* Contact is centre-aligned, so a single leading rule hangs off to one side. */
+.contact .eyebrow::after {
+  content: ''; width: 1.7rem; height: 1px; flex: none;
+  background: var(--blue); transform-origin: left; scale: 0 1;
+}
+.contact .eyebrow::after { transform-origin: right; }
 .h2 {
   margin: 0; font-family: var(--font-display), sans-serif; font-weight: 700;
   font-size: clamp(1.9rem, 3.4vw, 2.9rem); line-height: 1.15; letter-spacing: -.02em;
@@ -231,6 +239,8 @@ button, input, textarea { font: inherit; }
   border-radius: .6rem; background: rgba(47,139,255,.1); border: 1px solid rgba(47,139,255,.25); color: var(--blue);
 }
 .fact i svg { width: 1.05rem; height: 1.05rem; }
+.fact i { transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s, box-shadow .3s; }
+.fact:hover i { transform: rotate(-7deg) scale(1.1); background: rgba(47,139,255,.18); box-shadow: 0 0 0 5px rgba(47,139,255,.07); }
 .fact span { color: var(--muted); min-width: 6.5rem; }
 .about-visual { position: relative; aspect-ratio: 4/3; border-radius: 1rem; overflow: hidden; border: 1px solid var(--line); }
 /* The panels hold raymarched objects now rather than photographs. The canvas is
@@ -258,6 +268,13 @@ canvas.about-visual, canvas.tech-visual {
   background: rgba(47,139,255,.1); border: 1px solid rgba(47,139,255,.25); color: var(--blue);
 }
 .tech-cat h3 i svg { width: 1rem; height: 1rem; }
+.tech-cat { transition: transform .4s cubic-bezier(.22,1,.36,1); }
+.tech-cat:hover { transform: translateY(-4px); }
+.tech-cat h3 i { transition: transform .4s cubic-bezier(.22,1,.36,1), background .3s, border-color .3s; }
+.tech-cat:hover h3 i {
+  transform: rotate(-7deg) scale(1.08);
+  background: rgba(47,139,255,.18); border-color: rgba(90,166,255,.55);
+}
 .tech-cat p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.7; }
 
 /* ---------- projects ---------- */
@@ -270,10 +287,21 @@ canvas.about-visual, canvas.tech-visual {
   border: 1px solid var(--line); background: var(--panel);
   transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s, box-shadow .3s;
 }
-.proj:hover { transform: translateY(-6px); border-color: rgba(90,166,255,.5); box-shadow: 0 20px 40px -22px rgba(0,0,0,.9); }
+.proj:hover {
+  transform: translate3d(0, calc(var(--pary, 0rem) - 6px), 0);
+  border-color: rgba(90,166,255,.5); box-shadow: 0 20px 40px -22px rgba(0,0,0,.9);
+}
 .proj-shot { position: relative; aspect-ratio: 16/10; overflow: hidden; border-bottom: 1px solid var(--line); }
 .proj-shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .6s; }
 .proj:hover .proj-shot img { transform: scale(1.06); }
+/* A light sweeps across the shot on hover. Sits above the image and the badge,
+   which is why it must not take pointer events. */
+.proj-shot::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 36%, rgba(255,255,255,.13) 50%, transparent 64%);
+  translate: -130% 0; transition: translate .9s cubic-bezier(.33,1,.68,1);
+}
+.proj:hover .proj-shot::after { translate: 130% 0; }
 .proj-body { padding: 1.1rem; display: flex; flex-direction: column; gap: .5rem; flex: 1; }
 .proj-body h3 { margin: 0; font-family: var(--font-display), sans-serif; font-size: 1rem; font-weight: 600; }
 .proj-body > p { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.6; }
@@ -291,7 +319,13 @@ canvas.about-visual, canvas.tech-visual {
 
 /* ---------- experience ---------- */
 .exp-list { margin-top: 3rem; display: grid; gap: 1.2rem; }
-.exp { padding: 1.6rem; }
+.exp { position: relative; padding: 1.6rem; transition: border-color .35s, box-shadow .35s; }
+.exp:hover { border-color: rgba(90,166,255,.35); box-shadow: 0 18px 40px -28px rgba(0,0,0,.9); }
+.exp::before {
+  content: ''; position: absolute; left: -1px; top: 1.1rem; bottom: 1.1rem; width: 2px;
+  border-radius: 2px; background: linear-gradient(var(--blue), rgba(47,139,255,0));
+  transform-origin: top; scale: 1 0;
+}
 .exp-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .6rem; }
 .exp-top h3 { margin: 0; font-family: var(--font-display), sans-serif; font-size: 1.1rem; font-weight: 600; }
 .exp-top b { color: var(--blue); font-weight: 500; font-size: .9rem; }
@@ -305,7 +339,10 @@ canvas.about-visual, canvas.tech-visual {
 
 /* ---------- contact ---------- */
 .contact { position: relative; z-index: 0; text-align: center; overflow: hidden; }
-.contact-bg { position: absolute; inset: 0; background: url('/hero/desk.webp') center/cover; filter: blur(2px); transform: scale(1.05); }
+.contact-bg {
+  position: absolute; inset: 0; background: url('/hero/desk.webp') center/cover; filter: blur(2px);
+  transform: translate3d(0, calc((var(--sp, .5) - .5) * -3rem), 0) scale(1.2);
+}
 .contact-bg::after { content: ''; position: absolute; inset: 0; background: rgba(6,11,22,.85); }
 .contact .shell { position: relative; z-index: 2; }
 .contact h2 { margin-inline: auto; }
@@ -322,6 +359,41 @@ canvas.about-visual, canvas.tech-visual {
 .foot { border-top: 1px solid var(--line); }
 .foot-in { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.6rem 0; }
 .foot-in p { margin: 0; color: var(--muted); font-size: .78rem; }
+
+/* ---------- scroll motion ---------- */
+/* Entrances are animations rather than transitions on purpose: most of the
+   elements below already own a transition for their hover state, and a
+   transition shorthand here would silently cancel it. They move with the
+   `translate`/`scale` properties for the same reason — those compose with the
+   `transform` the parallax rules use instead of replacing it. */
+.stagger > * { opacity: 0; }
+.stagger.in-view > * { animation: rise-in .8s cubic-bezier(.22,1,.36,1) both; }
+.stagger.in-view > *:nth-child(2) { animation-delay: 90ms; }
+.stagger.in-view > *:nth-child(3) { animation-delay: 180ms; }
+.stagger.in-view > *:nth-child(4) { animation-delay: 270ms; }
+.stagger.in-view > *:nth-child(5) { animation-delay: 360ms; }
+.stagger.in-view > *:nth-child(6) { animation-delay: 450ms; }
+.stagger[data-dir='left'].in-view > * { animation-name: slide-in; }
+.stagger[data-dir='pop'].in-view > * { animation-name: pop-in; }
+@keyframes rise-in { from { opacity: 0; translate: 0 1.8rem; } to { opacity: 1; translate: none; } }
+@keyframes slide-in { from { opacity: 0; translate: -1.6rem 0; } to { opacity: 1; translate: none; } }
+@keyframes pop-in { from { opacity: 0; scale: .76; } to { opacity: 1; scale: 1; } }
+
+.in-view .eyebrow::before,
+.in-view .contact .eyebrow::after,
+.contact .in-view .eyebrow::after { animation: dash-in .9s cubic-bezier(.22,1,.36,1) .2s both; }
+@keyframes dash-in { to { scale: 1 1; } }
+
+.exp-list.in-view .exp::before { animation: draw-down 1.1s cubic-bezier(.22,1,.36,1) .25s both; }
+.exp-list.in-view > *:nth-child(2)::before { animation-delay: .45s; }
+@keyframes draw-down { to { scale: 1 1; } }
+
+/* Scroll-linked drift. --sp is written per section by Motion.tsx: 0 as the
+   section's top edge enters the viewport, 1 as its bottom edge leaves. Without
+   it the .5 default resolves every one of these to no offset at all. */
+[data-prog] .h2 { transform: translate3d(0, calc((var(--sp, .5) - .5) * -2rem), 0); }
+.proj-grid > * { --pary: 0rem; transform: translate3d(0, var(--pary), 0); }
+.proj-grid > *:nth-child(2n) { --pary: calc((var(--sp, .5) - .5) * -1.5rem); }
 
 /* ---------- responsive ---------- */
 @media (max-width: 980px) {
@@ -344,6 +416,8 @@ canvas.about-visual, canvas.tech-visual {
   /* shorter pin on a phone: 3.4 viewports of thumb-scroll before any content is too much */
   .hero[data-scrub] { height: 350vh; }
   .tech-cats, .proj-grid { grid-template-columns: 1fr; }
+  /* one column: a per-card offset would just read as uneven gaps */
+  .proj-grid > *:nth-child(2n) { --pary: 0rem; }
   .exp-proj strong { min-width: 100%; }
   .foot-in { flex-direction: column; text-align: center; }
 }
@@ -354,4 +428,6 @@ canvas.about-visual, canvas.tech-visual {
   .hero-bg { background: url('/hero/hero-still.webp') center/cover; }
   .hero-copy, .hero-note p, .scroll-cue-in, .hero-chips-in { animation: none; opacity: 1; transform: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
+  .stagger > * { opacity: 1; animation: none; }
+  .eyebrow::before, .eyebrow::after, .exp::before { animation: none; scale: 1 1; }
 }

@@ -3,10 +3,10 @@ import { SOCIALS } from '@/lib/socials';
 
 export default function Contact() {
   return (
-    <section className="section contact" id="contact">
+    <section className="section contact" id="contact" data-prog>
       <div className="contact-bg" aria-hidden="true" />
       <div className="shell">
-        <div className="reveal">
+        <div className="stagger">
           <p className="eyebrow">Let&apos;s Work Together</p>
           <h2 className="h2">
             Have a <em>Project</em> in Mind?
@@ -19,7 +19,7 @@ export default function Contact() {
             Get In Touch <ArrowRight />
           </a>
 
-          <div className="socials">
+          <div className="socials stagger" data-dir="pop">
             <a href={SOCIALS.github} target="_blank" rel="noreferrer" aria-label="GitHub">
               <Github />
             </a>

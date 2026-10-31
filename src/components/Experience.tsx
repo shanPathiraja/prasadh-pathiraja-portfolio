@@ -31,18 +31,18 @@ const JOBS = [
 
 export default function Experience() {
   return (
-    <section className="section" id="experience">
+    <section className="section" id="experience" data-prog>
       <div className="shell">
-        <div className="reveal">
+        <div className="stagger">
           <p className="eyebrow">Career</p>
           <h2 className="h2">
             Where I&apos;ve <em>Shipped</em>
           </h2>
         </div>
 
-        <div className="exp-list">
+        <div className="exp-list stagger">
           {JOBS.map((j) => (
-            <article className="exp card reveal" key={j.company}>
+            <article className="exp card" key={j.company}>
               <div className="exp-top">
                 <h3>
                   {j.role} <b>@ {j.company}</b>
@@ -50,7 +50,7 @@ export default function Experience() {
                 <time>{j.period}</time>
               </div>
               <p>{j.summary}</p>
-              <div className="exp-projects">
+              <div className="exp-projects stagger" data-dir="left">
                 {j.projects.map((p) => (
                   <div className="exp-proj" key={p[0]}>
                     <strong>{p[0]}</strong>

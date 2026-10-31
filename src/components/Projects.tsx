@@ -35,9 +35,9 @@ const PROJECTS = [
 
 export default function Projects() {
   return (
-    <section className="section projects" id="projects">
+    <section className="section projects" id="projects" data-prog>
       <div className="shell">
-        <div className="proj-head reveal">
+        <div className="proj-head stagger">
           <div>
             <p className="eyebrow">Featured Projects</p>
             <h2 className="h2">
@@ -49,10 +49,10 @@ export default function Projects() {
           </a>
         </div>
 
-        <div className="proj-grid">
+        <div className="proj-grid stagger">
           {PROJECTS.map((p) => (
             <a
-              className="proj reveal"
+              className="proj"
               key={p.name}
               href={p.href}
               target="_blank"

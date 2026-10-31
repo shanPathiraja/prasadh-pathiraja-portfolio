@@ -11,18 +11,18 @@ const CATS = [
 
 export default function Skills() {
   return (
-    <section className="section" id="skills">
+    <section className="section" id="skills" data-prog>
       <div className="shell tech-grid">
         {/* 3D object pulled for now — see the note in About.
             <SectionObject shape="lattice" className="tech-visual reveal" /> */}
 
-        <div className="reveal">
+        <div className="stagger">
           <p className="eyebrow">Tech Stack</p>
           <h2 className="h2">
             Technologies I <em>Work With</em>
           </h2>
 
-          <div className="tech-cats" style={{ marginTop: '2.4rem' }}>
+          <div className="tech-cats stagger" style={{ marginTop: '2.4rem' }}>
             {CATS.map((c) => (
               <div className="tech-cat" key={c.title}>
                 <h3>

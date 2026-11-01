@@ -84,7 +84,7 @@ export default function Hero() {
     const onLoaded = () => {
       seekable = true;
       // Safari (iOS especially) won't paint a seek until the element has been activated once.
-      video.play().then(() => video.pause()).catch(() => {});
+      video.play().then(() => video.pause()).catch(() => { });
     };
     if (video.readyState >= 2) onLoaded();
     else video.addEventListener('loadeddata', onLoaded, { once: true });
@@ -220,7 +220,7 @@ export default function Hero() {
             frames[i] = img;
             img
               .decode()
-              .catch(() => {})
+              .catch(() => { })
               .then(() => {
                 if (dead || ++loaded < FRAME_COUNT) return;
                 // Hand over only once the whole set is in memory, so a scroll
@@ -286,88 +286,88 @@ export default function Hero() {
       <canvas className="hero-logo" ref={logoRef} aria-hidden="true" />
 
       <section className="hero" id="home" ref={sectionRef}>
-      <div className="hero-stage" ref={stageRef}>
-        {/* Resting frame. Carries reduced motion and anything that can't play video. */}
-        <div className="hero-bg" />
+        <div className="hero-stage" ref={stageRef}>
+          {/* Resting frame. Carries reduced motion and anything that can't play video. */}
+          <div className="hero-bg" />
 
-        {/* Only the 1080p cut is wired to a media query, so a phone fetches no video
+          {/* Only the 1080p cut is wired to a media query, so a phone fetches no video
             at all unless the AVIF probe above fails and asks for the 720p one. */}
-        <video
-          className="hero-video"
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          preload="auto"
-          poster="/hero/hero-poster.webp"
-          aria-hidden="true"
-        >
-          <source media="(min-width: 861px)" src="/hero/hero-scrub-1080.mp4" type="video/mp4" />
-        </video>
+          <video
+            className="hero-video"
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            poster="/hero/hero-poster.webp"
+            aria-hidden="true"
+          >
+            <source media="(min-width: 861px)" src="/hero/hero-scrub-1080.mp4" type="video/mp4" />
+          </video>
 
-        <canvas
-          className="hero-frames"
-          ref={canvasRef}
-          width={FRAME_W}
-          height={FRAME_H}
-          aria-hidden="true"
-        />
+          <canvas
+            className="hero-frames"
+            ref={canvasRef}
+            width={FRAME_W}
+            height={FRAME_H}
+            aria-hidden="true"
+          />
 
-        <div className="hero-scrim" aria-hidden="true" />
+          <div className="hero-scrim" aria-hidden="true" />
 
-        <div className="hero-in shell">
-          <div className="hero-copy">
-            <p className="hello">Hello, I&apos;m</p>
-            <h1>
-              Buddhika Prasadh
+          <div className="hero-in shell">
+            <div className="hero-copy">
+              <p className="hello">Hello, I&apos;m</p>
+              <h1>
+                Prasadh
+                <br />
+                <span>Pathiraja</span>
+              </h1>
+              <p className="hero-role">Full-Stack Software Engineer</p>
+              <p className="lead">
+                I build modern web and mobile applications that solve real problems
+                and create meaningful experiences.
+              </p>
+              <div className="hero-actions">
+                <a className="btn btn-primary" href="#projects">
+                  View My Projects <ArrowRight />
+                </a>
+                <a className="btn btn-ghost" href="#contact">
+                  <Mail /> Contact Me
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Each of these is a parallax shell wrapping its own entrance animation: a CSS
+            animation owns transform/opacity outright, so the two can't share an element. */}
+          <div className="hero-note">
+            <p className="hand">
+              Code
               <br />
-              <span>Pathiraja</span>
-            </h1>
-            <p className="hero-role">Full-Stack Software Engineer</p>
-            <p className="lead">
-              I build modern web and mobile applications that solve real problems
-              and create meaningful experiences.
+              Build
+              <br />
+              Improve
+              <br />
+              Repeat
             </p>
-            <div className="hero-actions">
-              <a className="btn btn-primary" href="#projects">
-                View My Projects <ArrowRight />
-              </a>
-              <a className="btn btn-ghost" href="#contact">
-                <Mail /> Contact Me
-              </a>
+          </div>
+
+          <div className="scroll-cue">
+            <div className="scroll-cue-in">
+              <span>Scroll Down</span>
+              <i />
+            </div>
+          </div>
+
+          <div className="hero-chips" aria-hidden="true">
+            <div className="hero-chips-in">
+              {CHIPS.map((c) => (
+                <b key={c}>{c}</b>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Each of these is a parallax shell wrapping its own entrance animation: a CSS
-            animation owns transform/opacity outright, so the two can't share an element. */}
-        <div className="hero-note">
-          <p className="hand">
-            Code
-            <br />
-            Build
-            <br />
-            Improve
-            <br />
-            Repeat
-          </p>
-        </div>
-
-        <div className="scroll-cue">
-          <div className="scroll-cue-in">
-            <span>Scroll Down</span>
-            <i />
-          </div>
-        </div>
-
-        <div className="hero-chips" aria-hidden="true">
-          <div className="hero-chips-in">
-            {CHIPS.map((c) => (
-              <b key={c}>{c}</b>
-            ))}
-          </div>
-        </div>
-      </div>
       </section>
     </>
   );

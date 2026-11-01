@@ -319,7 +319,7 @@ export default function Hero() {
             <div className="hero-copy">
               <p className="hello">Hello, I&apos;m</p>
               <h1>
-                Prasadh
+                Buddhika Prasadh
                 <br />
                 <span>Pathiraja</span>
               </h1>
